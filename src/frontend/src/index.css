@@ -1,0 +1,173 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 1rem;
+    --background: 0.97 0.01 307;
+    --foreground: 0.23 0.05 307;
+    --card: 1 0 0;
+    --card-foreground: 0.23 0.05 307;
+    --popover: 1 0 0;
+    --popover-foreground: 0.23 0.05 307;
+    --primary: 0.48 0.13 307;
+    --primary-foreground: 1 0 0;
+    --secondary: 0.89 0.05 307;
+    --secondary-foreground: 0.48 0.13 307;
+    --muted: 0.94 0.02 307;
+    --muted-foreground: 0.52 0.02 307;
+    --accent: 0.91 0.04 220;
+    --accent-foreground: 0.23 0.05 307;
+    --destructive: 0.58 0.17 22;
+    --destructive-foreground: 1 0 0;
+    --border: 0.91 0.03 307;
+    --input: 0.91 0.03 307;
+    --ring: 0.48 0.13 307;
+    --chart-1: 0.88 0.06 0;
+    --chart-2: 0.91 0.06 70;
+    --chart-3: 0.89 0.05 307;
+    --chart-4: 0.91 0.04 220;
+    --chart-5: 0.48 0.13 307;
+    --sidebar: 1 0 0;
+    --sidebar-foreground: 0.23 0.05 307;
+    --sidebar-primary: 0.48 0.13 307;
+    --sidebar-primary-foreground: 1 0 0;
+    --sidebar-accent: 0.89 0.05 307;
+    --sidebar-accent-foreground: 0.48 0.13 307;
+    --sidebar-border: 0.91 0.03 307;
+    --sidebar-ring: 0.48 0.13 307;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Inter", sans-serif;
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(142, 92, 159, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 8px rgba(142, 92, 159, 0.3);
+  }
+}
+
+@keyframes pulseRed {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(224, 82, 77, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 24px 10px rgba(224, 82, 77, 0.3);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes segmentPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(142, 92, 159, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(142, 92, 159, 0.9));
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+.animate-pulse-red {
+  animation: pulseRed 2s infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-message-appear {
+  animation: messageAppear 0.3s ease-out forwards;
+}
+
+.segment-current {
+  animation: segmentPulse 2s infinite;
+}
+
+.progress-bar-animated {
+  animation: progressFill 1.2s ease-out forwards;
+}
+
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 35px rgba(142, 92, 159, 0.18);
+}
+
+@keyframes typingDot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8e5c9f;
+  display: inline-block;
+  margin: 0 2px;
+  animation: typingDot 1.2s infinite;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
