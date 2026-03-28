@@ -1,4 +1,3 @@
-import { useTexture } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import type * as THREE from "three";
@@ -644,51 +643,172 @@ function MonthDetailCard({
   );
 }
 
-function BabySphere({ imageUrl }: { imageUrl: string }) {
-  const meshRef = useRef<THREE.Mesh>(null!);
-  const texture = useTexture(imageUrl);
+function Baby3DModel() {
+  const groupRef = useRef<THREE.Group>(null!);
   const isDragging = useRef(false);
   const prevPointer = useRef({ x: 0, y: 0 });
+  const autoSpin = useRef(true);
 
-  useFrame((_state, delta) => {
-    if (!meshRef.current) return;
-    if (!isDragging.current) {
-      meshRef.current.rotation.y += delta * 0.4;
+  useFrame((state) => {
+    if (!groupRef.current) return;
+    const t = state.clock.getElapsedTime();
+
+    const body = groupRef.current.children[1] as THREE.Mesh;
+    if (body) {
+      body.scale.y = 1 + Math.sin(t * 1.8) * 0.03;
+    }
+
+    const head = groupRef.current.children[0] as THREE.Mesh;
+    if (head && !isDragging.current) {
+      head.rotation.y = Math.sin(t * 0.9) * 0.12;
+      head.rotation.z = Math.sin(t * 0.6) * 0.04;
+    }
+
+    if (autoSpin.current && !isDragging.current) {
+      groupRef.current.rotation.y += 0.008;
     }
   });
 
+  const skin = "#FFDAB9";
+  const darkSkin = "#F5C5A3";
+  const eyeColor = "#3D2B1F";
+
+  const pointerDown = (e: {
+    clientX: number;
+    clientY: number;
+    pointerId: number;
+    target: EventTarget | null;
+  }) => {
+    isDragging.current = true;
+    autoSpin.current = false;
+    prevPointer.current = { x: e.clientX, y: e.clientY };
+    (e.target as HTMLElement)?.setPointerCapture?.(e.pointerId);
+  };
+
+  const pointerMove = (e: { clientX: number; clientY: number }) => {
+    if (!isDragging.current || !groupRef.current) return;
+    const dx = e.clientX - prevPointer.current.x;
+    const dy = e.clientY - prevPointer.current.y;
+    groupRef.current.rotation.y += dx * 0.012;
+    groupRef.current.rotation.x += dy * 0.012;
+    groupRef.current.rotation.x = Math.max(
+      -1.2,
+      Math.min(1.2, groupRef.current.rotation.x),
+    );
+    prevPointer.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const pointerUp = () => {
+    isDragging.current = false;
+    setTimeout(() => {
+      autoSpin.current = true;
+    }, 1200);
+  };
+
   return (
-    <mesh
-      ref={meshRef}
-      onPointerDown={(e) => {
-        isDragging.current = true;
-        prevPointer.current = { x: e.clientX, y: e.clientY };
-        (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-      }}
-      onPointerMove={(e) => {
-        if (!isDragging.current || !meshRef.current) return;
-        const dx = e.clientX - prevPointer.current.x;
-        const dy = e.clientY - prevPointer.current.y;
-        meshRef.current.rotation.y += dx * 0.01;
-        meshRef.current.rotation.x += dy * 0.01;
-        prevPointer.current = { x: e.clientX, y: e.clientY };
-      }}
-      onPointerUp={() => {
-        isDragging.current = false;
-      }}
-      onPointerLeave={() => {
-        isDragging.current = false;
-      }}
+    <group
+      ref={groupRef}
+      onPointerDown={pointerDown}
+      onPointerMove={pointerMove}
+      onPointerUp={pointerUp}
+      onPointerLeave={pointerUp}
     >
-      <sphereGeometry args={[1.2, 64, 64]} />
-      <meshStandardMaterial map={texture} />
-    </mesh>
+      {/* Head */}
+      <mesh position={[0, 0.72, 0]}>
+        <sphereGeometry args={[0.44, 32, 32]} />
+        <meshStandardMaterial color={skin} roughness={0.6} />
+      </mesh>
+
+      {/* Body */}
+      <mesh position={[0, 0.0, 0]}>
+        <capsuleGeometry args={[0.28, 0.55, 16, 32]} />
+        <meshStandardMaterial color={skin} roughness={0.6} />
+      </mesh>
+
+      {/* Left ear */}
+      <mesh position={[-0.44, 0.72, 0]}>
+        <sphereGeometry args={[0.1, 16, 16]} />
+        <meshStandardMaterial color={darkSkin} roughness={0.6} />
+      </mesh>
+
+      {/* Right ear */}
+      <mesh position={[0.44, 0.72, 0]}>
+        <sphereGeometry args={[0.1, 16, 16]} />
+        <meshStandardMaterial color={darkSkin} roughness={0.6} />
+      </mesh>
+
+      {/* Left eye */}
+      <mesh position={[-0.15, 0.78, 0.38]}>
+        <sphereGeometry args={[0.055, 12, 12]} />
+        <meshStandardMaterial
+          color={eyeColor}
+          roughness={0.3}
+          metalness={0.1}
+        />
+      </mesh>
+
+      {/* Right eye */}
+      <mesh position={[0.15, 0.78, 0.38]}>
+        <sphereGeometry args={[0.055, 12, 12]} />
+        <meshStandardMaterial
+          color={eyeColor}
+          roughness={0.3}
+          metalness={0.1}
+        />
+      </mesh>
+
+      {/* Nose */}
+      <mesh position={[0, 0.68, 0.43]}>
+        <sphereGeometry args={[0.04, 10, 10]} />
+        <meshStandardMaterial color={darkSkin} roughness={0.7} />
+      </mesh>
+
+      {/* Tummy bump */}
+      <mesh position={[0, 0.06, 0.24]}>
+        <sphereGeometry args={[0.18, 16, 16]} />
+        <meshStandardMaterial color={skin} roughness={0.5} />
+      </mesh>
+
+      {/* Left arm */}
+      <mesh position={[-0.38, 0.18, 0]} rotation={[0, 0, 0.7]}>
+        <capsuleGeometry args={[0.09, 0.35, 8, 16]} />
+        <meshStandardMaterial color={skin} roughness={0.6} />
+      </mesh>
+
+      {/* Right arm */}
+      <mesh position={[0.38, 0.18, 0]} rotation={[0, 0, -0.7]}>
+        <capsuleGeometry args={[0.09, 0.35, 8, 16]} />
+        <meshStandardMaterial color={skin} roughness={0.6} />
+      </mesh>
+
+      {/* Left leg */}
+      <mesh position={[-0.16, -0.62, 0]} rotation={[0.15, 0, 0.1]}>
+        <capsuleGeometry args={[0.1, 0.32, 8, 16]} />
+        <meshStandardMaterial color={skin} roughness={0.6} />
+      </mesh>
+
+      {/* Right leg */}
+      <mesh position={[0.16, -0.62, 0]} rotation={[0.15, 0, -0.1]}>
+        <capsuleGeometry args={[0.1, 0.32, 8, 16]} />
+        <meshStandardMaterial color={skin} roughness={0.6} />
+      </mesh>
+
+      {/* Left foot */}
+      <mesh position={[-0.17, -0.88, 0.08]}>
+        <sphereGeometry args={[0.12, 14, 14]} />
+        <meshStandardMaterial color={darkSkin} roughness={0.6} />
+      </mesh>
+
+      {/* Right foot */}
+      <mesh position={[0.17, -0.88, 0.08]}>
+        <sphereGeometry args={[0.12, 14, 14]} />
+        <meshStandardMaterial color={darkSkin} roughness={0.6} />
+      </mesh>
+    </group>
   );
 }
 
 function Baby360Viewer() {
-  const imageUrl = BABY_IMAGES[CURRENT_MONTH - 1];
-
   return (
     <div
       className="bg-white rounded-2xl p-5 mb-6"
@@ -713,19 +833,24 @@ function Baby360Viewer() {
       <div className="flex flex-col items-center select-none">
         <div
           style={{
-            width: 200,
-            height: 200,
-            borderRadius: "50%",
+            width: 240,
+            height: 280,
+            borderRadius: 20,
             background: "linear-gradient(135deg, #F8F4FB 0%, #EDE0FA 100%)",
             boxShadow: "0 4px 20px rgba(142,92,159,0.2)",
             overflow: "hidden",
             cursor: "grab",
           }}
         >
-          <Canvas camera={{ position: [0, 0, 3.5], fov: 45 }}>
-            <ambientLight intensity={0.7} />
-            <directionalLight position={[5, 5, 5]} intensity={0.8} />
-            <BabySphere imageUrl={imageUrl} />
+          <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
+            <ambientLight intensity={0.8} />
+            <directionalLight position={[5, 8, 5]} intensity={1.0} />
+            <directionalLight
+              position={[-5, 2, -3]}
+              intensity={0.3}
+              color="#E8D5F5"
+            />
+            <Baby3DModel />
           </Canvas>
         </div>
         <div className="flex items-center gap-3 mt-3">
