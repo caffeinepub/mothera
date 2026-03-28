@@ -1845,6 +1845,10 @@ function AIChat({ onClose }: { onClose?: () => void }) {
   const [hasSentMessage, setHasSentMessage] = useState(false);
   const nextIdRef = useRef(INITIAL_MESSAGES.length + 1);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const recognitionRef = useRef<any>(null);
 
   const handleSend = (text: string) => {
     const trimmed = text.trim();
@@ -1870,8 +1874,56 @@ function AIChat({ onClose }: { onClose?: () => void }) {
       setMessages((prev) => [...prev, aiMsg]);
       nextIdRef.current += 1;
       setIsTyping(false);
+      if (voiceEnabled && "speechSynthesis" in window) {
+        const utter = new SpeechSynthesisUtterance(aiMsg.text);
+        utter.lang = "en-US";
+        utter.rate = 0.9;
+        utter.pitch = 1.1;
+        const voices = window.speechSynthesis.getVoices();
+        const femaleVoice = voices.find(
+          (v) => v.lang.startsWith("en") && /female/i.test(v.name),
+        );
+        if (femaleVoice) utter.voice = femaleVoice;
+        utter.onstart = () => setIsSpeaking(true);
+        utter.onend = () => setIsSpeaking(false);
+        window.speechSynthesis.speak(utter);
+      }
     }, 1200);
   };
+
+  const startListening = () => {
+    const SpeechRecognitionCtor =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) return;
+    const recognition = new SpeechRecognitionCtor();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript;
+      setIsListening(false);
+      handleSend(transcript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
+  const hasSpeechSupport =
+    typeof window !== "undefined" &&
+    !!(
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition
+    );
 
   const sendMessage = () => handleSend(inputValue);
 
@@ -1912,6 +1964,57 @@ function AIChat({ onClose }: { onClose?: () => void }) {
             Mothera Pregnancy Assistant · Online
           </p>
         </div>
+        <button
+          type="button"
+          data-ocid="chat.toggle"
+          onClick={() => {
+            setVoiceEnabled((v) => !v);
+            if (isSpeaking) window.speechSynthesis.cancel();
+          }}
+          className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/20 cursor-pointer"
+          aria-label={voiceEnabled ? "Mute voice" : "Unmute voice"}
+          title={voiceEnabled ? "Mute Tina's voice" : "Enable Tina's voice"}
+        >
+          {voiceEnabled ? (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={isSpeaking ? "#FFD700" : "white"}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+              className={isSpeaking ? "animate-pulse" : ""}
+            >
+              <title>Speaker on</title>
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+          ) : (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+              style={{ opacity: 0.5 }}
+            >
+              <title>Speaker off</title>
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <line x1="23" y1="9" x2="17" y2="15" />
+              <line x1="17" y1="9" x2="23" y2="15" />
+            </svg>
+          )}
+        </button>
         {onClose && (
           <button
             type="button"
@@ -2049,6 +2152,54 @@ function AIChat({ onClose }: { onClose?: () => void }) {
             color: "#2B1F3A",
           }}
         />
+        {hasSpeechSupport && (
+          <button
+            type="button"
+            data-ocid="chat.button"
+            onClick={isListening ? stopListening : startListening}
+            disabled={isTyping}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 cursor-pointer disabled:opacity-60 ${isListening ? "animate-pulse" : ""}`}
+            style={{
+              background: isListening
+                ? "linear-gradient(135deg, #ef4444, #dc2626)"
+                : "linear-gradient(135deg, #C7A8E8, #8E5C9F)",
+            }}
+            aria-label={isListening ? "Stop listening" : "Start voice input"}
+          >
+            {isListening ? (
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="white"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <title>Stop</title>
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
+            ) : (
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <title>Microphone</title>
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="8" y1="23" x2="16" y2="23" />
+              </svg>
+            )}
+          </button>
+        )}
         <button
           type="button"
           data-ocid="chat.submit_button"
