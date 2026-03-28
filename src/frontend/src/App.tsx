@@ -2699,6 +2699,263 @@ function DoctorConnect() {
   );
 }
 
+function CheckUpReminder() {
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleDone = () => {
+    if (!date) {
+      setError("Please select a date.");
+      return;
+    }
+    setError("");
+    setDone(true);
+  };
+
+  const handleEdit = () => {
+    setDone(false);
+  };
+
+  const getRemainingDays = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkup = new Date(date);
+    checkup.setHours(0, 0, 0, 0);
+    const diff = Math.ceil(
+      (checkup.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    return diff;
+  };
+
+  const formatDate = () => {
+    const checkup = new Date(date + (time ? `T${time}` : ""));
+    const dateStr = checkup.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    if (time) {
+      const timeStr = checkup.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      return `${dateStr} at ${timeStr}`;
+    }
+    return dateStr;
+  };
+
+  const remainingDays = done ? getRemainingDays() : 0;
+  const totalDays = done ? Math.min(Math.max(getRemainingDays(), 1), 365) : 1;
+  const progress = done
+    ? Math.max(0, Math.min(remainingDays / totalDays, 1))
+    : 0;
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference * (1 - progress);
+
+  return (
+    <div
+      className="bg-white rounded-2xl p-5 mb-6"
+      style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
+      data-ocid="checkup_reminder.card"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: "linear-gradient(135deg, #C8A6E0, #8E5C9F)" }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            role="img"
+            aria-label="Calendar"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-lg font-bold" style={{ color: "#2B1F3A" }}>
+            Check Up Reminder
+          </h2>
+          <p className="text-xs" style={{ color: "#7A7386" }}>
+            Schedule your next check-up
+          </p>
+        </div>
+      </div>
+
+      {!done ? (
+        <div>
+          <div className="mb-3">
+            <label
+              htmlFor="checkup-date"
+              className="block text-sm font-medium mb-1"
+              style={{ color: "#2B1F3A" }}
+            >
+              Date
+            </label>
+            <input
+              id="checkup-date"
+              type="date"
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+                setError("");
+              }}
+              className="w-full rounded-xl px-4 py-2 text-sm border outline-none transition-all"
+              style={{
+                borderColor: "#C8A6E0",
+                color: "#2B1F3A",
+                background: "#FAF5FF",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#8E5C9F";
+                e.target.style.boxShadow = "0 0 0 3px rgba(142,92,159,0.15)";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#C8A6E0";
+                e.target.style.boxShadow = "none";
+              }}
+              data-ocid="checkup_reminder.input"
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="checkup-time"
+              className="block text-sm font-medium mb-1"
+              style={{ color: "#2B1F3A" }}
+            >
+              Time
+            </label>
+            <input
+              id="checkup-time"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full rounded-xl px-4 py-2 text-sm border outline-none transition-all"
+              style={{
+                borderColor: "#C8A6E0",
+                color: "#2B1F3A",
+                background: "#FAF5FF",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#8E5C9F";
+                e.target.style.boxShadow = "0 0 0 3px rgba(142,92,159,0.15)";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#C8A6E0";
+                e.target.style.boxShadow = "none";
+              }}
+              data-ocid="checkup_reminder.input"
+            />
+          </div>
+          {error && (
+            <p
+              className="text-xs mb-3"
+              style={{ color: "#e05c7a" }}
+              data-ocid="checkup_reminder.error_state"
+            >
+              {error}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleDone}
+            className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-98"
+            style={{ background: "#8E5C9F" }}
+            data-ocid="checkup_reminder.submit_button"
+          >
+            Done
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center">
+          <div className="relative" style={{ width: 160, height: 160 }}>
+            <svg
+              width="160"
+              height="160"
+              viewBox="0 0 160 160"
+              role="img"
+              aria-label="Checkup countdown"
+            >
+              <circle
+                cx="80"
+                cy="80"
+                r={radius}
+                fill="none"
+                stroke="#E8D5F5"
+                strokeWidth="12"
+              />
+              <circle
+                cx="80"
+                cy="80"
+                r={radius}
+                fill="none"
+                stroke="#8E5C9F"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                transform="rotate(-90 80 80)"
+                style={{ transition: "stroke-dashoffset 0.8s ease" }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-4xl font-bold" style={{ color: "#8E5C9F" }}>
+                {remainingDays <= 0 ? "0" : remainingDays}
+              </span>
+              <span
+                className="text-xs font-medium"
+                style={{ color: "#7A7386" }}
+              >
+                days left
+              </span>
+            </div>
+          </div>
+          {remainingDays <= 0 ? (
+            <p
+              className="mt-2 text-sm font-medium"
+              style={{ color: "#e05c7a" }}
+            >
+              Checkup date passed
+            </p>
+          ) : (
+            <p
+              className="mt-2 text-sm font-medium"
+              style={{ color: "#7A7386" }}
+            >
+              {formatDate()}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleEdit}
+            className="mt-4 w-full py-3 rounded-xl text-sm font-semibold transition-all hover:bg-purple-50"
+            style={{
+              border: "1.5px solid #8E5C9F",
+              color: "#8E5C9F",
+              background: "transparent",
+            }}
+            data-ocid="checkup_reminder.edit_button"
+          >
+            Edit
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Footer() {
   const year = new Date().getFullYear();
   const hostname =
@@ -2809,6 +3066,7 @@ export default function App() {
         <HealthWellness />
         <NearbyHelp />
         <DoctorConnect />
+        <CheckUpReminder />
       </main>
       <Footer />
       <TinaChatOverlay />
