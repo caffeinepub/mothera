@@ -1,6 +1,6 @@
-import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
-import type * as THREE from "three";
+import LoginPage from "./LoginPage";
+import PersonalInfoPage, { type UserInfo } from "./PersonalInfoPage";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MonthData {
@@ -643,220 +643,36 @@ function MonthDetailCard({
   );
 }
 
-function Baby3DModel() {
-  const groupRef = useRef<THREE.Group>(null!);
-  const isDragging = useRef(false);
-  const prevPointer = useRef({ x: 0, y: 0 });
-  const autoSpin = useRef(true);
-
-  useFrame((state) => {
-    if (!groupRef.current) return;
-    const t = state.clock.getElapsedTime();
-
-    const body = groupRef.current.children[1] as THREE.Mesh;
-    if (body) {
-      body.scale.y = 1 + Math.sin(t * 1.8) * 0.03;
-    }
-
-    const head = groupRef.current.children[0] as THREE.Mesh;
-    if (head && !isDragging.current) {
-      head.rotation.y = Math.sin(t * 0.9) * 0.12;
-      head.rotation.z = Math.sin(t * 0.6) * 0.04;
-    }
-
-    if (autoSpin.current && !isDragging.current) {
-      groupRef.current.rotation.y += 0.008;
-    }
-  });
-
-  const skin = "#FFDAB9";
-  const darkSkin = "#F5C5A3";
-  const eyeColor = "#3D2B1F";
-
-  const pointerDown = (e: {
-    clientX: number;
-    clientY: number;
-    pointerId: number;
-    target: EventTarget | null;
-  }) => {
-    isDragging.current = true;
-    autoSpin.current = false;
-    prevPointer.current = { x: e.clientX, y: e.clientY };
-    (e.target as HTMLElement)?.setPointerCapture?.(e.pointerId);
-  };
-
-  const pointerMove = (e: { clientX: number; clientY: number }) => {
-    if (!isDragging.current || !groupRef.current) return;
-    const dx = e.clientX - prevPointer.current.x;
-    const dy = e.clientY - prevPointer.current.y;
-    groupRef.current.rotation.y += dx * 0.012;
-    groupRef.current.rotation.x += dy * 0.012;
-    groupRef.current.rotation.x = Math.max(
-      -1.2,
-      Math.min(1.2, groupRef.current.rotation.x),
-    );
-    prevPointer.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const pointerUp = () => {
-    isDragging.current = false;
-    setTimeout(() => {
-      autoSpin.current = true;
-    }, 1200);
-  };
-
-  return (
-    <group
-      ref={groupRef}
-      onPointerDown={pointerDown}
-      onPointerMove={pointerMove}
-      onPointerUp={pointerUp}
-      onPointerLeave={pointerUp}
-    >
-      {/* Head */}
-      <mesh position={[0, 0.72, 0]}>
-        <sphereGeometry args={[0.44, 32, 32]} />
-        <meshStandardMaterial color={skin} roughness={0.6} />
-      </mesh>
-
-      {/* Body */}
-      <mesh position={[0, 0.0, 0]}>
-        <capsuleGeometry args={[0.28, 0.55, 16, 32]} />
-        <meshStandardMaterial color={skin} roughness={0.6} />
-      </mesh>
-
-      {/* Left ear */}
-      <mesh position={[-0.44, 0.72, 0]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshStandardMaterial color={darkSkin} roughness={0.6} />
-      </mesh>
-
-      {/* Right ear */}
-      <mesh position={[0.44, 0.72, 0]}>
-        <sphereGeometry args={[0.1, 16, 16]} />
-        <meshStandardMaterial color={darkSkin} roughness={0.6} />
-      </mesh>
-
-      {/* Left eye */}
-      <mesh position={[-0.15, 0.78, 0.38]}>
-        <sphereGeometry args={[0.055, 12, 12]} />
-        <meshStandardMaterial
-          color={eyeColor}
-          roughness={0.3}
-          metalness={0.1}
-        />
-      </mesh>
-
-      {/* Right eye */}
-      <mesh position={[0.15, 0.78, 0.38]}>
-        <sphereGeometry args={[0.055, 12, 12]} />
-        <meshStandardMaterial
-          color={eyeColor}
-          roughness={0.3}
-          metalness={0.1}
-        />
-      </mesh>
-
-      {/* Nose */}
-      <mesh position={[0, 0.68, 0.43]}>
-        <sphereGeometry args={[0.04, 10, 10]} />
-        <meshStandardMaterial color={darkSkin} roughness={0.7} />
-      </mesh>
-
-      {/* Tummy bump */}
-      <mesh position={[0, 0.06, 0.24]}>
-        <sphereGeometry args={[0.18, 16, 16]} />
-        <meshStandardMaterial color={skin} roughness={0.5} />
-      </mesh>
-
-      {/* Left arm */}
-      <mesh position={[-0.38, 0.18, 0]} rotation={[0, 0, 0.7]}>
-        <capsuleGeometry args={[0.09, 0.35, 8, 16]} />
-        <meshStandardMaterial color={skin} roughness={0.6} />
-      </mesh>
-
-      {/* Right arm */}
-      <mesh position={[0.38, 0.18, 0]} rotation={[0, 0, -0.7]}>
-        <capsuleGeometry args={[0.09, 0.35, 8, 16]} />
-        <meshStandardMaterial color={skin} roughness={0.6} />
-      </mesh>
-
-      {/* Left leg */}
-      <mesh position={[-0.16, -0.62, 0]} rotation={[0.15, 0, 0.1]}>
-        <capsuleGeometry args={[0.1, 0.32, 8, 16]} />
-        <meshStandardMaterial color={skin} roughness={0.6} />
-      </mesh>
-
-      {/* Right leg */}
-      <mesh position={[0.16, -0.62, 0]} rotation={[0.15, 0, -0.1]}>
-        <capsuleGeometry args={[0.1, 0.32, 8, 16]} />
-        <meshStandardMaterial color={skin} roughness={0.6} />
-      </mesh>
-
-      {/* Left foot */}
-      <mesh position={[-0.17, -0.88, 0.08]}>
-        <sphereGeometry args={[0.12, 14, 14]} />
-        <meshStandardMaterial color={darkSkin} roughness={0.6} />
-      </mesh>
-
-      {/* Right foot */}
-      <mesh position={[0.17, -0.88, 0.08]}>
-        <sphereGeometry args={[0.12, 14, 14]} />
-        <meshStandardMaterial color={darkSkin} roughness={0.6} />
-      </mesh>
-    </group>
-  );
-}
-
-function Baby360Viewer() {
+function Baby360Viewer({ selectedMonth }: { selectedMonth: number | null }) {
+  const displayMonth =
+    selectedMonth !== null ? selectedMonth + 1 : CURRENT_MONTH;
   return (
     <div
       className="bg-white rounded-2xl p-5 mb-6"
       style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <div>
-          <p className="font-bold text-base" style={{ color: "#2B1F3A" }}>
-            Baby at Month {CURRENT_MONTH}
-          </p>
-          <p className="text-xs" style={{ color: "#7A7386" }}>
-            Drag to explore 360°
-          </p>
-        </div>
-        <span
-          className="text-xs font-bold px-3 py-1 rounded-full"
-          style={{ background: "#E8D5F5", color: "#8E5C9F" }}
-        >
-          360°
-        </span>
-      </div>
-      <div className="flex flex-col items-center select-none">
+      <p className="font-bold text-base mb-3" style={{ color: "#2B1F3A" }}>
+        Baby at Month {displayMonth}
+      </p>
+      <div className="flex justify-center">
         <div
           style={{
             width: 240,
-            height: 280,
+            height: 240,
             borderRadius: 20,
             background: "linear-gradient(135deg, #F8F4FB 0%, #EDE0FA 100%)",
             boxShadow: "0 4px 20px rgba(142,92,159,0.2)",
             overflow: "hidden",
-            cursor: "grab",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <Canvas camera={{ position: [0, 0, 4], fov: 50 }}>
-            <ambientLight intensity={0.8} />
-            <directionalLight position={[5, 8, 5]} intensity={1.0} />
-            <directionalLight
-              position={[-5, 2, -3]}
-              intensity={0.3}
-              color="#E8D5F5"
-            />
-            <Baby3DModel />
-          </Canvas>
-        </div>
-        <div className="flex items-center gap-3 mt-3">
-          <span className="text-xs" style={{ color: "#CDB9E9" }}>
-            ← drag to rotate →
-          </span>
+          <img
+            src={BABY_IMAGES[displayMonth - 1]}
+            alt={`Baby at month ${displayMonth}`}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
         </div>
       </div>
     </div>
@@ -1121,7 +937,7 @@ function CircularTimeline({
 }
 
 // ─── Components ───────────────────────────────────────────────────────────────
-function NavBar() {
+function NavBar({ onLogout }: { onLogout: () => void }) {
   return (
     <nav
       className="sticky top-0 z-50 bg-white px-4 py-2"
@@ -1139,22 +955,43 @@ function NavBar() {
             Mothera
           </span>
         </div>
-        <div className="hidden md:flex items-center gap-1">
-          {["Dashboard", "Timeline", "Wellness", "Connect"].map((item, i) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              data-ocid={`nav.link.${i + 1}`}
-              className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200"
-              style={
-                i === 0
-                  ? { background: "#E8D5F5", color: "#8E5C9F" }
-                  : { color: "#7A7386" }
-              }
-            >
-              {item}
-            </a>
-          ))}
+        <div className="flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1">
+            {["Dashboard", "Timeline", "Wellness", "Connect"].map((item, i) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                data-ocid={`nav.link.${i + 1}`}
+                className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200"
+                style={
+                  i === 0
+                    ? { background: "#E8D5F5", color: "#8E5C9F" }
+                    : { color: "#7A7386" }
+                }
+              >
+                {item}
+              </a>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={onLogout}
+            data-ocid="nav.button"
+            className="ml-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-200"
+            style={{
+              background: "#F0E8FA",
+              color: "#8E5C9F",
+              border: "1.5px solid #D8C0F0",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#E0D0F5";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#F0E8FA";
+            }}
+          >
+            Logout
+          </button>
         </div>
       </div>
     </nav>
@@ -1163,15 +1000,46 @@ function NavBar() {
 
 function Header({
   selectedMonth: _selectedMonth,
-}: { selectedMonth: number | null }) {
+  userName,
+  userInfo,
+}: {
+  selectedMonth: number | null;
+  userName: string;
+  userInfo: UserInfo | null;
+}) {
   return (
     <div id="dashboard" className="mb-6 pt-6">
       <div className="flex items-center gap-2 mb-1">
         <h1 className="text-3xl font-extrabold" style={{ color: "#2B1F3A" }}>
-          Hello, Mom
+          Hello, {userName ? userName : "Mom"}!
         </h1>
         <HeartIcon className="w-7 h-7" />
       </div>
+      {(userInfo?.bloodGroup ||
+        userInfo?.dueDate ||
+        userInfo?.pregnancyWeek) && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {userInfo?.bloodGroup && (
+            <span className="rounded-full bg-purple-100 text-purple-700 text-xs px-3 py-1 font-medium">
+              Blood: {userInfo.bloodGroup}
+            </span>
+          )}
+          {userInfo?.dueDate && (
+            <span className="rounded-full bg-purple-100 text-purple-700 text-xs px-3 py-1 font-medium">
+              Due:{" "}
+              {new Date(userInfo.dueDate).toLocaleDateString("en-IN", {
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          )}
+          {userInfo?.pregnancyWeek && (
+            <span className="rounded-full bg-purple-100 text-purple-700 text-xs px-3 py-1 font-medium">
+              Week {userInfo.pregnancyWeek}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1898,7 +1766,9 @@ function MedicineReminderPanelWithCount({
   return <MedicineReminderPanel onSaveWithCount={onSave} />;
 }
 
-function EmergencySOS() {
+function EmergencySOS({
+  emergencyContact,
+}: { emergencyContact: { name: string; phone: string } | null }) {
   return (
     <div
       className="rounded-2xl p-5 mb-6"
@@ -1926,6 +1796,22 @@ function EmergencySOS() {
         >
           Call Now
         </button>
+        {emergencyContact?.name && (
+          <button
+            type="button"
+            data-ocid="emergency.secondary_button"
+            onClick={() => {
+              window.location.href = `tel:${emergencyContact.phone}`;
+            }}
+            className="px-6 py-2 rounded-full font-semibold text-white text-sm cursor-pointer transition-transform hover:scale-105"
+            style={{
+              background: "rgba(255,255,255,0.2)",
+              border: "1px solid rgba(255,255,255,0.4)",
+            }}
+          >
+            Call {emergencyContact.name}
+          </button>
+        )}
         <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
           Or call 108 directly
         </p>
@@ -2826,10 +2712,13 @@ function NearbyHelp() {
   );
 }
 
-function DoctorConnect() {
+function DoctorConnect({
+  userDoctorName,
+  userPhone,
+}: { userDoctorName: string; userPhone: string }) {
   const [selected, setSelected] = useState<number | null>(null);
 
-  const doctors = [
+  const baseDoctors = [
     {
       name: "Dr. Priya Sharma",
       specialty: "OB-GYN",
@@ -2855,6 +2744,20 @@ function DoctorConnect() {
       accent: "#7AAFE0",
     },
   ];
+
+  const doctors = userDoctorName
+    ? [
+        {
+          name: userDoctorName,
+          specialty: "Your Doctor",
+          phone: userPhone || "",
+          displayPhone: userPhone || "—",
+          gradient: "linear-gradient(135deg, #6B21A8, #9333EA)",
+          accent: "#9333EA",
+        },
+        ...baseDoctors,
+      ]
+    : baseDoctors;
 
   const selectedDoc = selected !== null ? doctors[selected] : null;
 
@@ -3630,7 +3533,42 @@ function TinaChatOverlay() {
 
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasCompletedProfile, setHasCompletedProfile] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const autoMonth = userInfo?.pregnancyWeek
+    ? Math.min(
+        Math.max(
+          Math.ceil(Number.parseInt(userInfo.pregnancyWeek) / 4.3) - 1,
+          0,
+        ),
+        9,
+      )
+    : null;
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(autoMonth);
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+  }
+  if (!hasCompletedProfile) {
+    return (
+      <PersonalInfoPage
+        onComplete={(data) => {
+          setUserInfo(data);
+          setHasCompletedProfile(true);
+          if (data.pregnancyWeek) {
+            const m = Math.min(
+              Math.max(
+                Math.ceil(Number.parseInt(data.pregnancyWeek) / 4.3) - 1,
+                0,
+              ),
+              9,
+            );
+            setSelectedMonth(m);
+          }
+        }}
+      />
+    );
+  }
   return (
     <div
       style={{
@@ -3638,14 +3576,18 @@ export default function App() {
         minHeight: "100vh",
       }}
     >
-      <NavBar />
+      <NavBar onLogout={() => setIsLoggedIn(false)} />
       <main className="max-w-6xl mx-auto px-4 lg:px-12 pb-0">
         {/* Desktop: Hello Mom + Timeline side-by-side */}
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start mb-0">
           <div>
-            <Header selectedMonth={selectedMonth} />
+            <Header
+              selectedMonth={selectedMonth}
+              userName={userInfo?.firstName || ""}
+              userInfo={userInfo}
+            />
             <PregnancyTracker />
-            <Baby360Viewer />
+            <Baby360Viewer selectedMonth={selectedMonth} />
           </div>
           <div className="lg:pt-6">
             <CircularTimeline
@@ -3677,7 +3619,16 @@ export default function App() {
 
         {/* Desktop: Emergency full-width centered */}
         <div className="lg:max-w-2xl lg:mx-auto">
-          <EmergencySOS />
+          <EmergencySOS
+            emergencyContact={
+              userInfo?.emergencyName
+                ? {
+                    name: userInfo.emergencyName,
+                    phone: userInfo.emergencyPhone,
+                  }
+                : null
+            }
+          />
         </div>
 
         <HealthWellness />
@@ -3688,7 +3639,10 @@ export default function App() {
           <NearbyHelp />
         </div>
 
-        <DoctorConnect />
+        <DoctorConnect
+          userDoctorName={userInfo?.doctorName || ""}
+          userPhone={userInfo?.phone || ""}
+        />
       </main>
       <Footer />
       <MusicOverlay />
