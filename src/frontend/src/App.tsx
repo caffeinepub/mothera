@@ -467,7 +467,7 @@ function MonthDetailCard({
 
   return (
     <div
-      className="animate-fade-in bg-white rounded-2xl p-5 mt-4"
+      className="animate-fade-in bg-white rounded-2xl p-5"
       style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.15)" }}
     >
       {/* Header */}
@@ -634,6 +634,123 @@ function MonthDetailCard({
         >
           <span className="text-xs font-semibold" style={{ color: "#A05A1A" }}>
             🌟 Key Nutrients: {data.dietPlan.nutrients}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Baby360Viewer() {
+  const [angle, setAngle] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartX = useRef(0);
+  const dragStartAngle = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-rotate when not dragging
+  useEffect(() => {
+    if (!isDragging) {
+      const interval = setInterval(() => {
+        setAngle((a) => a + 0.8);
+      }, 30);
+      return () => clearInterval(interval);
+    }
+  }, [isDragging]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    dragStartX.current = e.clientX;
+    dragStartAngle.current = angle;
+  };
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const delta = e.clientX - dragStartX.current;
+    setAngle(dragStartAngle.current + delta * 0.8);
+  };
+  const handleMouseUp = () => setIsDragging(false);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    dragStartX.current = e.touches[0].clientX;
+    dragStartAngle.current = angle;
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const delta = e.touches[0].clientX - dragStartX.current;
+    setAngle(dragStartAngle.current + delta * 0.8);
+  };
+  const handleTouchEnd = () => setIsDragging(false);
+
+  const rad = (angle * Math.PI) / 180;
+  const scaleX = Math.cos(rad);
+  const absScaleX = Math.abs(scaleX);
+  const brightness = 0.7 + 0.3 * absScaleX;
+
+  return (
+    <div
+      className="bg-white rounded-2xl p-5 mb-6"
+      style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <p className="font-bold text-base" style={{ color: "#2B1F3A" }}>
+            Baby at Month {CURRENT_MONTH}
+          </p>
+          <p className="text-xs" style={{ color: "#7A7386" }}>
+            Drag to explore 360°
+          </p>
+        </div>
+        <span
+          className="text-xs font-bold px-3 py-1 rounded-full"
+          style={{ background: "#E8D5F5", color: "#8E5C9F" }}
+        >
+          360°
+        </span>
+      </div>
+      <div
+        ref={containerRef}
+        className="flex flex-col items-center select-none"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ cursor: isDragging ? "grabbing" : "grab" }}
+      >
+        <div
+          style={{
+            width: 180,
+            height: 180,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #F8F4FB 0%, #EDE0FA 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 4px 20px rgba(142,92,159,0.2)",
+            overflow: "hidden",
+          }}
+        >
+          <img
+            src={BABY_IMAGES[CURRENT_MONTH - 1]}
+            alt={`Baby development month ${CURRENT_MONTH}`}
+            width={140}
+            height={140}
+            style={{
+              objectFit: "contain",
+              transform: `scaleX(${scaleX})`,
+              filter: `brightness(${brightness})`,
+              transition: isDragging ? "none" : "transform 0.05s linear",
+              userSelect: "none",
+              pointerEvents: "none",
+            }}
+            draggable={false}
+          />
+        </div>
+        <div className="flex items-center gap-3 mt-3">
+          <span className="text-xs" style={{ color: "#CDB9E9" }}>
+            ← drag →
           </span>
         </div>
       </div>
@@ -894,13 +1011,6 @@ function CircularTimeline({
           Tap a segment to see month details
         </p>
       </div>
-
-      {selectedMonth !== null && (
-        <MonthDetailCard
-          data={MONTH_DATA[selectedMonth]}
-          onClose={() => setSelectedMonth(null)}
-        />
-      )}
     </div>
   );
 }
@@ -913,7 +1023,7 @@ function NavBar() {
       style={{ boxShadow: "0 2px 12px rgba(142,92,159,0.1)" }}
       data-ocid="nav.panel"
     >
-      <div className="max-w-2xl mx-auto flex items-center justify-between">
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
           <img
             src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
@@ -1569,7 +1679,7 @@ function MedicineReminderModule() {
                 Edit
               </button>
             </div>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center">
               {savedEntries.map((med) => {
                 const _total =
                   typeof med.amount === "number" && med.amount > 0
@@ -2648,7 +2758,7 @@ function DoctorConnect() {
       <h2 className="text-lg font-semibold mb-4" style={{ color: "#2B1F3A" }}>
         Doctor Connect
       </h2>
-      <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {doctors.map((doc, i) => (
           <button
             key={doc.name}
@@ -3107,187 +3217,6 @@ function CheckUpReminder() {
   );
 }
 
-function UserFeedbacks() {
-  const feedbacks = [
-    {
-      name: "Priya Sharma",
-      avatar:
-        "https://ui-avatars.com/api/?name=Priya+Sharma&background=E8D5F5&color=6B3A7D&size=80&bold=true",
-      rating: 5,
-      category: "Diet Tips",
-      date: "March 2026",
-      review:
-        "The diet suggestions in Mothera have been a game changer! I was struggling with iron deficiency and the meal plan guidance helped me include spinach, lentils and fortified foods naturally. My hemoglobin improved by my 28th week!",
-    },
-    {
-      name: "Anjali Reddy",
-      avatar:
-        "https://ui-avatars.com/api/?name=Anjali+Reddy&background=D5E8F5&color=3A6B7D&size=80&bold=true",
-      rating: 5,
-      category: "Meditation",
-      date: "February 2026",
-      review:
-        "The meditation guidance helped me manage anxiety during my third trimester. The breathing exercises were especially calming. I recommend it to every mom-to-be. Five stars without any doubt!",
-    },
-    {
-      name: "Meera Nair",
-      avatar:
-        "https://ui-avatars.com/api/?name=Meera+Nair&background=F5E8D5&color=7D5A3A&size=80&bold=true",
-      rating: 5,
-      category: "Health Tips",
-      date: "March 2026",
-      review:
-        "Following Mothera's health tips about staying hydrated and doing light walks every day made a huge difference. My doctor was impressed with my blood pressure readings throughout the pregnancy!",
-    },
-    {
-      name: "Sunita Patel",
-      avatar:
-        "https://ui-avatars.com/api/?name=Sunita+Patel&background=F5D5E8&color=7D3A6B&size=80&bold=true",
-      rating: 5,
-      category: "Doctor Advice",
-      date: "January 2026",
-      review:
-        "The Doctor Connect feature is brilliant. I spoke to Dr. Kavya through the app and she guided me through my gestational diabetes management. The advice was professional and I felt very supported!",
-    },
-    {
-      name: "Deepa Krishnan",
-      avatar:
-        "https://ui-avatars.com/api/?name=Deepa+Krishnan&background=D5F5E8&color=3A7D5A&size=80&bold=true",
-      rating: 4,
-      category: "Meditation",
-      date: "February 2026",
-      review:
-        "The yoga and meditation videos are very well curated for pregnancy. I followed the routines consistently and my back pain during the second trimester reduced significantly. Truly a blessing for pregnant moms!",
-    },
-    {
-      name: "Kavitha Menon",
-      avatar:
-        "https://ui-avatars.com/api/?name=Kavitha+Menon&background=EDE8F5&color=4A3A7D&size=80&bold=true",
-      rating: 5,
-      category: "Diet Tips",
-      date: "March 2026",
-      review:
-        "I was not sure what to eat during my first trimester. The diet guidance helped me understand what vitamins and minerals are most important. My nausea reduced once I started the smaller, frequent meal approach suggested here!",
-    },
-  ];
-  const categoryColor: Record<string, string> = {
-    "Diet Tips": "bg-purple-100 text-purple-700",
-    Meditation: "bg-blue-100 text-blue-700",
-    "Health Tips": "bg-green-100 text-green-700",
-    "Doctor Advice": "bg-pink-100 text-pink-700",
-  };
-  return (
-    <section
-      className="py-12 px-4"
-      style={{
-        background: "linear-gradient(135deg, #f9f4ff 0%, #fff5fb 100%)",
-      }}
-    >
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold mb-2" style={{ color: "#6B3A7D" }}>
-            What Moms Are Saying
-          </h2>
-          <p className="text-gray-500 text-sm">
-            Real experiences from our Mothera community
-          </p>
-          <div className="flex items-center justify-center gap-2 mt-3">
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map((s) => (
-                <svg
-                  aria-label="star"
-                  role="img"
-                  key={s}
-                  className="w-5 h-5 text-yellow-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <span className="font-bold text-gray-700">4.9</span>
-            <span className="text-gray-400 text-sm">
-              · Based on Google Reviews
-            </span>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {feedbacks.map((fb) => (
-            <div
-              key={fb.name}
-              className="bg-white rounded-2xl shadow-md p-6 flex flex-col gap-3 hover:shadow-lg transition-shadow border border-purple-50"
-            >
-              <div className="flex items-center gap-3">
-                <img
-                  src={fb.avatar}
-                  alt={fb.name}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-purple-200"
-                />
-                <div>
-                  <p className="font-semibold text-gray-800 text-sm">
-                    {fb.name}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {fb.date} · via Google
-                  </p>
-                </div>
-                <div className="ml-auto flex items-center gap-1">
-                  <svg
-                    aria-label="Google review"
-                    role="img"
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                      fill="#34A853"
-                    />
-                    <path
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                      fill="#EA4335"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <span
-                className={`self-start text-xs font-medium px-2 py-1 rounded-full ${categoryColor[fb.category] || "bg-gray-100 text-gray-600"}`}
-              >
-                {fb.category}
-              </span>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map((s) => (
-                  <svg
-                    aria-label="star"
-                    role="img"
-                    key={s}
-                    className={`w-4 h-4 ${s <= fb.rating ? "text-yellow-400" : "text-gray-200"}`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                "{fb.review}"
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 function Footer() {
   const year = new Date().getFullYear();
   const hostname =
@@ -3320,6 +3249,225 @@ function Footer() {
         </a>
       </p>
     </footer>
+  );
+}
+
+// ─── MusicOverlay ─────────────────────────────────────────────────────────────
+const PREGNANCY_MUSIC = [
+  {
+    id: "lullabies",
+    title: "Relaxing Lullabies",
+    description: "Gentle lullabies to soothe you and your baby",
+    embedUrl:
+      "https://www.youtube.com/embed/videoseries?list=PLhQCJTkrHOwSX8LUnIMgaTq3chP1tiTut",
+    isPlaylist: true,
+    videoId: null,
+  },
+  {
+    id: "yoga",
+    title: "Prenatal Yoga Music",
+    description: "Peaceful music for your yoga and stretching sessions",
+    embedUrl: "https://www.youtube.com/embed/5qap5aO4i9A",
+    isPlaylist: false,
+    videoId: "5qap5aO4i9A",
+  },
+  {
+    id: "nature",
+    title: "Calming Nature Sounds",
+    description: "Natural soundscapes for deep relaxation",
+    embedUrl: "https://www.youtube.com/embed/1ZYbU82GVz4",
+    isPlaylist: false,
+    videoId: "1ZYbU82GVz4",
+  },
+  {
+    id: "classical",
+    title: "Classical Music for Baby",
+    description: "Classical compositions to stimulate your baby's development",
+    embedUrl: "https://www.youtube.com/embed/Wb4kUBBDKdY",
+    isPlaylist: false,
+    videoId: "Wb4kUBBDKdY",
+  },
+  {
+    id: "meditation",
+    title: "Breathing & Meditation",
+    description: "Guided breathing music for calm and mindfulness",
+    embedUrl: "https://www.youtube.com/embed/SEfs5TJZ6Nk",
+    isPlaylist: false,
+    videoId: "SEfs5TJZ6Nk",
+  },
+  {
+    id: "piano",
+    title: "Gentle Piano for Pregnancy",
+    description: "Soft piano melodies to ease stress and anxiety",
+    embedUrl: "https://www.youtube.com/embed/77ZozI0rw7w",
+    isPlaylist: false,
+    videoId: "77ZozI0rw7w",
+  },
+];
+
+function MusicCard({ item }: { item: (typeof PREGNANCY_MUSIC)[0] }) {
+  const [playing, setPlaying] = useState(false);
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden shadow-lg flex flex-col"
+      style={{
+        background: "rgba(255,255,255,0.12)",
+        border: "1px solid rgba(255,255,255,0.25)",
+      }}
+    >
+      {!playing ? (
+        <button
+          type="button"
+          className="relative w-full aspect-video cursor-pointer group"
+          onClick={() => setPlaying(true)}
+          aria-label={`Play ${item.title}`}
+          style={{ background: "linear-gradient(135deg, #6B3FA0, #9B6DC5)" }}
+        >
+          {item.isPlaylist ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <span style={{ fontSize: "3rem" }}>🎵</span>
+              <span className="text-white text-sm font-medium opacity-80">
+                Playlist
+              </span>
+            </div>
+          ) : (
+            <img
+              src={`https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`}
+              alt={item.title}
+              className="w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-all">
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-transform group-hover:scale-110"
+              style={{ background: "rgba(255,255,255,0.9)" }}
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="#8E5C9F"
+                aria-hidden="true"
+              >
+                <title>Play</title>
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            </div>
+          </div>
+        </button>
+      ) : (
+        <div className="w-full aspect-video">
+          <iframe
+            src={`${item.embedUrl}?autoplay=1`}
+            title={item.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full border-0"
+          />
+        </div>
+      )}
+      <div className="p-3">
+        <h3 className="font-semibold text-white text-sm">{item.title}</h3>
+        <p className="text-purple-200 text-xs mt-1 opacity-80">
+          {item.description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function MusicOverlay() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      {/* Floating Music Button */}
+      <button
+        type="button"
+        data-ocid="music.open_modal_button"
+        onClick={() => setIsOpen(true)}
+        aria-label="Pregnancy Music"
+        title="Pregnancy Music"
+        className="fixed bottom-24 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 cursor-pointer"
+        style={{ background: "linear-gradient(135deg, #8E5C9F, #B07CC6)" }}
+      >
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <title>Pregnancy Music</title>
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
+      </button>
+
+      {/* Full-Screen Music Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col"
+          data-ocid="music.modal"
+          style={{
+            background:
+              "linear-gradient(180deg, #3D1560 0%, #6B3FA0 40%, #9B6DC5 100%)",
+          }}
+        >
+          {/* Header */}
+          <div
+            className="flex items-center justify-between px-5 py-4 shrink-0"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.2)" }}
+          >
+            <div>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                🎵 Pregnancy Music
+              </h2>
+              <p className="text-purple-200 text-xs mt-0.5">
+                Soothing music to help you and your baby relax
+              </p>
+            </div>
+            <button
+              type="button"
+              data-ocid="music.close_button"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close music"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all hover:bg-white/20"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <title>Close</title>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Music Grid */}
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto pb-6">
+              {PREGNANCY_MUSIC.map((item) => (
+                <MusicCard key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -3386,22 +3534,59 @@ export default function App() {
       }}
     >
       <NavBar />
-      <main className="max-w-2xl mx-auto px-4 pb-0">
-        <Header selectedMonth={selectedMonth} />
-        <PregnancyTracker />
-        <CircularTimeline
-          selectedMonth={selectedMonth}
-          setSelectedMonth={setSelectedMonth}
-        />
+      <main className="max-w-6xl mx-auto px-4 lg:px-12 pb-0">
+        {/* Desktop: Hello Mom + Timeline side-by-side */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start mb-0">
+          <div>
+            <Header selectedMonth={selectedMonth} />
+            <PregnancyTracker />
+            <Baby360Viewer />
+          </div>
+          <div className="lg:pt-6">
+            <CircularTimeline
+              selectedMonth={selectedMonth}
+              setSelectedMonth={setSelectedMonth}
+            />
+          </div>
+        </div>
+
+        {selectedMonth !== null && (
+          <div
+            className="bg-white rounded-2xl p-6 mb-0"
+            style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.1)" }}
+          >
+            <h2
+              className="text-lg font-semibold mb-4"
+              style={{ color: "#2B1F3A" }}
+            >
+              Month Details
+            </h2>
+            <MonthDetailCard
+              data={MONTH_DATA[selectedMonth]}
+              onClose={() => setSelectedMonth(null)}
+            />
+          </div>
+        )}
+
         <MedicineReminderModule />
-        <EmergencySOS />
+
+        {/* Desktop: Emergency full-width centered */}
+        <div className="lg:max-w-2xl lg:mx-auto">
+          <EmergencySOS />
+        </div>
+
         <HealthWellness />
-        <NearbyHelp />
+
+        {/* Desktop: CheckUp + Nearby side-by-side */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start">
+          <CheckUpReminder />
+          <NearbyHelp />
+        </div>
+
         <DoctorConnect />
-        <CheckUpReminder />
-        <UserFeedbacks />
       </main>
       <Footer />
+      <MusicOverlay />
       <TinaChatOverlay />
     </div>
   );
