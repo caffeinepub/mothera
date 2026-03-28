@@ -1,4 +1,7 @@
+import { useTexture } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
+import type * as THREE from "three";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MonthData {
@@ -641,50 +644,50 @@ function MonthDetailCard({
   );
 }
 
-function Baby360Viewer() {
-  const [angle, setAngle] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartX = useRef(0);
-  const dragStartAngle = useRef(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+function BabySphere({ imageUrl }: { imageUrl: string }) {
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const texture = useTexture(imageUrl);
+  const isDragging = useRef(false);
+  const prevPointer = useRef({ x: 0, y: 0 });
 
-  // Auto-rotate when not dragging
-  useEffect(() => {
-    if (!isDragging) {
-      const interval = setInterval(() => {
-        setAngle((a) => a + 0.8);
-      }, 30);
-      return () => clearInterval(interval);
+  useFrame((_state, delta) => {
+    if (!meshRef.current) return;
+    if (!isDragging.current) {
+      meshRef.current.rotation.y += delta * 0.4;
     }
-  }, [isDragging]);
+  });
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    dragStartX.current = e.clientX;
-    dragStartAngle.current = angle;
-  };
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const delta = e.clientX - dragStartX.current;
-    setAngle(dragStartAngle.current + delta * 0.8);
-  };
-  const handleMouseUp = () => setIsDragging(false);
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setIsDragging(true);
-    dragStartX.current = e.touches[0].clientX;
-    dragStartAngle.current = angle;
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    const delta = e.touches[0].clientX - dragStartX.current;
-    setAngle(dragStartAngle.current + delta * 0.8);
-  };
-  const handleTouchEnd = () => setIsDragging(false);
+  return (
+    <mesh
+      ref={meshRef}
+      onPointerDown={(e) => {
+        isDragging.current = true;
+        prevPointer.current = { x: e.clientX, y: e.clientY };
+        (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+      }}
+      onPointerMove={(e) => {
+        if (!isDragging.current || !meshRef.current) return;
+        const dx = e.clientX - prevPointer.current.x;
+        const dy = e.clientY - prevPointer.current.y;
+        meshRef.current.rotation.y += dx * 0.01;
+        meshRef.current.rotation.x += dy * 0.01;
+        prevPointer.current = { x: e.clientX, y: e.clientY };
+      }}
+      onPointerUp={() => {
+        isDragging.current = false;
+      }}
+      onPointerLeave={() => {
+        isDragging.current = false;
+      }}
+    >
+      <sphereGeometry args={[1.2, 64, 64]} />
+      <meshStandardMaterial map={texture} />
+    </mesh>
+  );
+}
 
-  const rad = (angle * Math.PI) / 180;
-  const scaleX = Math.cos(rad);
-  const absScaleX = Math.abs(scaleX);
-  const brightness = 0.7 + 0.3 * absScaleX;
+function Baby360Viewer() {
+  const imageUrl = BABY_IMAGES[CURRENT_MONTH - 1];
 
   return (
     <div
@@ -707,50 +710,27 @@ function Baby360Viewer() {
           360°
         </span>
       </div>
-      <div
-        ref={containerRef}
-        className="flex flex-col items-center select-none"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{ cursor: isDragging ? "grabbing" : "grab" }}
-      >
+      <div className="flex flex-col items-center select-none">
         <div
           style={{
-            width: 180,
-            height: 180,
+            width: 200,
+            height: 200,
             borderRadius: "50%",
             background: "linear-gradient(135deg, #F8F4FB 0%, #EDE0FA 100%)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             boxShadow: "0 4px 20px rgba(142,92,159,0.2)",
             overflow: "hidden",
+            cursor: "grab",
           }}
         >
-          <img
-            src={BABY_IMAGES[CURRENT_MONTH - 1]}
-            alt={`Baby development month ${CURRENT_MONTH}`}
-            width={140}
-            height={140}
-            style={{
-              objectFit: "contain",
-              transform: `scaleX(${scaleX})`,
-              filter: `brightness(${brightness})`,
-              transition: isDragging ? "none" : "transform 0.05s linear",
-              userSelect: "none",
-              pointerEvents: "none",
-            }}
-            draggable={false}
-          />
+          <Canvas camera={{ position: [0, 0, 3.5], fov: 45 }}>
+            <ambientLight intensity={0.7} />
+            <directionalLight position={[5, 5, 5]} intensity={0.8} />
+            <BabySphere imageUrl={imageUrl} />
+          </Canvas>
         </div>
         <div className="flex items-center gap-3 mt-3">
           <span className="text-xs" style={{ color: "#CDB9E9" }}>
-            ← drag →
+            ← drag to rotate →
           </span>
         </div>
       </div>
