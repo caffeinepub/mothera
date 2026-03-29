@@ -1,0 +1,5087 @@
+# Mothera — Complete Source Code Document
+
+---
+
+## 1. Backend — src/backend/main.mo
+```motoko
+actor {}
+```
+
+---
+## 2. Frontend Entry — src/frontend/src/main.tsx
+```tsx
+import ReactDOM from "react-dom/client";
+import { InternetIdentityProvider } from "./hooks/useInternetIdentity";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import App from "./App";
+import "./index.css";
+
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
+declare global {
+  interface BigInt {
+    toJSON(): string;
+  }
+}
+
+const queryClient = new QueryClient();
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <QueryClientProvider client={queryClient}>
+    <InternetIdentityProvider>
+      <App />
+    </InternetIdentityProvider>
+  </QueryClientProvider>,
+);
+```
+
+---
+## 3. Login Page — src/frontend/src/LoginPage.tsx
+```tsx
+import { Eye, EyeOff, Heart } from "lucide-react";
+import { useState } from "react";
+
+interface LoginPageProps {
+  onLogin: () => void;
+}
+
+export default function LoginPage({ onLogin }: LoginPageProps) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter your email and password.");
+      return;
+    }
+    setError("");
+    onLogin();
+  }
+
+  return (
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{
+        background:
+          "linear-gradient(135deg, #F8F4FB 0%, #EDE4F5 50%, #D8C8F0 100%)",
+      }}
+    >
+      {/* Decorative blobs */}
+      <div
+        className="fixed top-[-80px] left-[-80px] w-[320px] h-[320px] rounded-full pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(142,92,159,0.18) 0%, transparent 70%)",
+        }}
+      />
+      <div
+        className="fixed bottom-[-60px] right-[-60px] w-[280px] h-[280px] rounded-full pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(200,164,230,0.22) 0%, transparent 70%)",
+        }}
+      />
+
+      <div
+        className="w-full max-w-md rounded-3xl p-8 relative"
+        style={{
+          background: "rgba(255,255,255,0.92)",
+          boxShadow:
+            "0 20px 60px rgba(142,92,159,0.18), 0 4px 20px rgba(142,92,159,0.08)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
+        {/* Logo + Branding */}
+        <div className="flex flex-col items-center mb-8">
+          <div
+            className="w-20 h-20 rounded-full overflow-hidden mb-3 flex items-center justify-center"
+            style={{ boxShadow: "0 4px 16px rgba(142,92,159,0.25)" }}
+          >
+            <img
+              src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
+              alt="Mothera Logo"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <h1
+            className="text-3xl font-extrabold tracking-tight"
+            style={{ color: "#8E5C9F" }}
+          >
+            Mothera
+          </h1>
+          <p className="text-sm mt-1" style={{ color: "#7A7386" }}>
+            Your pregnancy companion
+          </p>
+        </div>
+
+        {/* Divider */}
+        <div
+          className="w-full h-px mb-6"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, rgba(142,92,159,0.2), transparent)",
+          }}
+        />
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="login-email"
+              className="text-sm font-semibold"
+              style={{ color: "#2B1F3A" }}
+            >
+              Gmail or Email
+            </label>
+            <input
+              id="login-email"
+              type="email"
+              placeholder="you@gmail.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              data-ocid="login.input"
+              className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+              style={{
+                border: "1.5px solid #E0D0F0",
+                background: "#FAF7FD",
+                color: "#2B1F3A",
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.border = "1.5px solid #8E5C9F";
+                e.currentTarget.style.boxShadow =
+                  "0 0 0 3px rgba(142,92,159,0.12)";
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.border = "1.5px solid #E0D0F0";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            />
+          </div>
+
+          {/* Password */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="login-password"
+              className="text-sm font-semibold"
+              style={{ color: "#2B1F3A" }}
+            >
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="login-password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                data-ocid="login.input"
+                className="w-full px-4 py-3 pr-12 rounded-xl text-sm outline-none transition-all"
+                style={{
+                  border: "1.5px solid #E0D0F0",
+                  background: "#FAF7FD",
+                  color: "#2B1F3A",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.border = "1.5px solid #8E5C9F";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 0 3px rgba(142,92,159,0.12)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.border = "1.5px solid #E0D0F0";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors"
+                style={{ color: "#8E5C9F" }}
+                data-ocid="login.toggle"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p
+              className="text-xs font-medium px-3 py-2 rounded-lg"
+              style={{
+                color: "#C0392B",
+                background: "#FDF0EE",
+                border: "1px solid #F5C6C6",
+              }}
+              data-ocid="login.error_state"
+            >
+              {error}
+            </p>
+          )}
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all duration-200 mt-2"
+            style={{
+              background: "linear-gradient(135deg, #8E5C9F 0%, #B07CC6 100%)",
+              color: "#fff",
+              boxShadow: "0 4px 16px rgba(142,92,159,0.35)",
+            }}
+            data-ocid="login.submit_button"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = "translateY(-1px)";
+              e.currentTarget.style.boxShadow =
+                "0 6px 20px rgba(142,92,159,0.45)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow =
+                "0 4px 16px rgba(142,92,159,0.35)";
+            }}
+          >
+            Sign In
+          </button>
+        </form>
+
+        {/* Footer note */}
+        <div className="flex items-center justify-center gap-1.5 mt-6">
+          <Heart
+            className="w-3.5 h-3.5"
+            style={{ color: "#C8A4E6", fill: "#C8A4E6" }}
+          />
+          <p className="text-xs" style={{ color: "#B0A0C0" }}>
+            Your journey to motherhood begins here
+          </p>
+          <Heart
+            className="w-3.5 h-3.5"
+            style={{ color: "#C8A4E6", fill: "#C8A4E6" }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+## 4. Personal Info Page — src/frontend/src/PersonalInfoPage.tsx
+```tsx
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Heart, Phone, User } from "lucide-react";
+import { useState } from "react";
+
+export interface UserInfo {
+  firstName: string;
+  lastName: string;
+  dob: string;
+  phone: string;
+  bloodGroup: string;
+  dueDate: string;
+  pregnancyConfirmDate: string;
+  pregnancyWeek: string;
+  previousPregnancies: string;
+  doctorName: string;
+  emergencyName: string;
+  emergencyPhone: string;
+}
+
+interface PersonalInfoPageProps {
+  onComplete: (data: UserInfo) => void;
+}
+
+export default function PersonalInfoPage({
+  onComplete,
+}: PersonalInfoPageProps) {
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    dob: "",
+    phone: "",
+    bloodGroup: "",
+    dueDate: "",
+    pregnancyConfirmDate: "",
+    pregnancyWeek: "",
+    previousPregnancies: "",
+    doctorName: "",
+    emergencyName: "",
+    emergencyPhone: "",
+  });
+  const [warn, setWarn] = useState(false);
+
+  const set = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    if (warn) setWarn(false);
+  };
+
+  const handleContinue = () => {
+    const hasAny = Object.values(form).some((v) => v.trim() !== "");
+    if (!hasAny) {
+      setWarn(true);
+      return;
+    }
+    onComplete(form);
+  };
+
+  const inputClass =
+    "bg-white/70 border-purple-200 focus:border-purple-400 focus:ring-purple-300 rounded-xl h-11 text-purple-900 placeholder:text-purple-300";
+  const labelClass = "text-purple-700 font-medium text-sm mb-1 block";
+
+  return (
+    <div
+      style={{
+        background:
+          "linear-gradient(160deg, #F8F4FB 0%, #EDE4F5 50%, #E0D4F7 100%)",
+        minHeight: "100vh",
+      }}
+      className="flex flex-col items-center px-4 py-10"
+    >
+      {/* Logo + Heading */}
+      <div className="flex flex-col items-center mb-8">
+        <div className="flex items-center gap-3 mb-5">
+          <img
+            src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
+            alt="Mothera Logo"
+            className="w-14 h-14 rounded-full object-cover shadow-md border-2 border-purple-200"
+          />
+          <span
+            style={{ fontFamily: "Fraunces, serif" }}
+            className="text-3xl font-bold text-purple-700 tracking-tight"
+          >
+            Mothera
+          </span>
+        </div>
+        <h1
+          style={{ fontFamily: "Fraunces, serif" }}
+          className="text-2xl md:text-3xl font-semibold text-purple-800 text-center leading-snug"
+        >
+          Welcome to Mothera 💜 — Tell Us About You
+        </h1>
+        <p className="text-purple-500 text-center mt-2 text-sm md:text-base max-w-md">
+          We'll personalise your journey based on your details. You can skip
+          fields and fill them later.
+        </p>
+      </div>
+
+      {warn && (
+        <div
+          data-ocid="personal_info.error_state"
+          className="mb-6 bg-pink-50 border border-pink-200 text-pink-700 rounded-xl px-5 py-3 text-sm text-center max-w-2xl w-full"
+        >
+          Please fill in at least one field before continuing.
+        </div>
+      )}
+
+      <div className="w-full max-w-2xl flex flex-col gap-6">
+        {/* Section: Personal Details */}
+        <section
+          className="bg-white/60 backdrop-blur-sm border border-purple-100 rounded-2xl shadow-sm p-6"
+          data-ocid="personal_info.section"
+        >
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-purple-600" />
+            </div>
+            <h2 className="text-purple-700 font-semibold text-base">
+              Personal Details
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName" className={labelClass}>
+                First Name
+              </Label>
+              <Input
+                id="firstName"
+                data-ocid="personal_info.input"
+                placeholder="e.g. Priya"
+                className={inputClass}
+                value={form.firstName}
+                onChange={(e) => set("firstName", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName" className={labelClass}>
+                Last Name
+              </Label>
+              <Input
+                id="lastName"
+                data-ocid="personal_info.input"
+                placeholder="e.g. Sharma"
+                className={inputClass}
+                value={form.lastName}
+                onChange={(e) => set("lastName", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="dob" className={labelClass}>
+                Date of Birth
+              </Label>
+              <Input
+                id="dob"
+                type="date"
+                data-ocid="personal_info.input"
+                className={inputClass}
+                value={form.dob}
+                onChange={(e) => set("dob", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone" className={labelClass}>
+                Phone Number
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                data-ocid="personal_info.input"
+                placeholder="e.g. +91 98765 43210"
+                className={inputClass}
+                value={form.phone}
+                onChange={(e) => set("phone", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="bloodGroup" className={labelClass}>
+                Blood Group
+              </Label>
+              <Select onValueChange={(v) => set("bloodGroup", v)}>
+                <SelectTrigger
+                  id="bloodGroup"
+                  data-ocid="personal_info.select"
+                  className={`${inputClass} w-full`}
+                >
+                  <SelectValue placeholder="Select blood group" />
+                </SelectTrigger>
+                <SelectContent>
+                  {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map(
+                    (bg) => (
+                      <SelectItem key={bg} value={bg}>
+                        {bg}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="doctorName" className={labelClass}>
+                Doctor's Name
+              </Label>
+              <Input
+                id="doctorName"
+                data-ocid="personal_info.input"
+                placeholder="e.g. Dr. Meena Kapoor"
+                className={inputClass}
+                value={form.doctorName}
+                onChange={(e) => set("doctorName", e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Pregnancy Details */}
+        <section
+          className="bg-white/60 backdrop-blur-sm border border-purple-100 rounded-2xl shadow-sm p-6"
+          data-ocid="pregnancy_info.section"
+        >
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
+              <Heart className="w-4 h-4 text-pink-500" />
+            </div>
+            <h2 className="text-purple-700 font-semibold text-base">
+              Pregnancy Details
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="dueDate" className={labelClass}>
+                Expected Due Date
+              </Label>
+              <Input
+                id="dueDate"
+                type="date"
+                data-ocid="pregnancy_info.input"
+                className={inputClass}
+                value={form.dueDate}
+                onChange={(e) => set("dueDate", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="pregnancyConfirmDate" className={labelClass}>
+                Date of Pregnancy Confirmation
+              </Label>
+              <Input
+                id="pregnancyConfirmDate"
+                type="date"
+                data-ocid="pregnancy_info.input"
+                className={inputClass}
+                value={form.pregnancyConfirmDate}
+                onChange={(e) => set("pregnancyConfirmDate", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="pregnancyWeek" className={labelClass}>
+                Current Pregnancy Week
+              </Label>
+              <Input
+                id="pregnancyWeek"
+                type="number"
+                min={1}
+                max={42}
+                data-ocid="pregnancy_info.input"
+                placeholder="e.g. 20"
+                className={inputClass}
+                value={form.pregnancyWeek}
+                onChange={(e) => set("pregnancyWeek", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="previousPregnancies" className={labelClass}>
+                Number of Previous Pregnancies
+              </Label>
+              <Input
+                id="previousPregnancies"
+                type="number"
+                min={0}
+                data-ocid="pregnancy_info.input"
+                placeholder="e.g. 0"
+                className={inputClass}
+                value={form.previousPregnancies}
+                onChange={(e) => set("previousPregnancies", e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Section: Emergency Contact */}
+        <section
+          className="bg-white/60 backdrop-blur-sm border border-purple-100 rounded-2xl shadow-sm p-6"
+          data-ocid="emergency_info.section"
+        >
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+              <Phone className="w-4 h-4 text-red-500" />
+            </div>
+            <h2 className="text-purple-700 font-semibold text-base">
+              Emergency Contact
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="emergencyName" className={labelClass}>
+                Emergency Contact Name
+              </Label>
+              <Input
+                id="emergencyName"
+                data-ocid="emergency_info.input"
+                placeholder="e.g. Rahul Sharma"
+                className={inputClass}
+                value={form.emergencyName}
+                onChange={(e) => set("emergencyName", e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="emergencyPhone" className={labelClass}>
+                Emergency Contact Number
+              </Label>
+              <Input
+                id="emergencyPhone"
+                type="tel"
+                data-ocid="emergency_info.input"
+                placeholder="e.g. +91 98765 43210"
+                className={inputClass}
+                value={form.emergencyPhone}
+                onChange={(e) => set("emergencyPhone", e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <div className="flex flex-col items-center gap-3 pb-4">
+          <Button
+            data-ocid="personal_info.primary_button"
+            onClick={handleContinue}
+            className="w-full sm:w-auto px-10 h-12 text-base font-semibold rounded-2xl shadow-md"
+            style={{
+              background: "linear-gradient(135deg, #9B59D0 0%, #7C3AED 100%)",
+              color: "#fff",
+              border: "none",
+            }}
+          >
+            Continue to Dashboard →
+          </Button>
+          <button
+            type="button"
+            data-ocid="personal_info.secondary_button"
+            onClick={() => onComplete(form)}
+            className="text-purple-400 text-sm hover:text-purple-600 underline-offset-2 hover:underline transition-colors"
+          >
+            Skip for now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+## 5. Main Dashboard — src/frontend/src/App.tsx
+```tsx
+import { useEffect, useRef, useState } from "react";
+import LoginPage from "./LoginPage";
+import PersonalInfoPage, { type UserInfo } from "./PersonalInfoPage";
+
+// ─── Global Notification System ───────────────────────────────────────────────
+type NotifType = { id: number; message: string; type: "warning" | "urgent" };
+let notifListeners: ((n: NotifType) => void)[] = [];
+const shownNotifKeys = new Set<string>();
+function emitNotif(n: Omit<NotifType, "id">) {
+  const key = `${n.type}|${n.message}`;
+  if (shownNotifKeys.has(key)) return;
+  shownNotifKeys.add(key);
+  const notif = { ...n, id: Date.now() };
+  for (const fn of notifListeners) fn(notif);
+  // Clear key after 60s so same alert can re-appear next day
+  setTimeout(() => shownNotifKeys.delete(key), 60000);
+}
+
+function GlobalNotifications() {
+  const [notifs, setNotifs] = useState<NotifType[]>([]);
+  useEffect(() => {
+    const handler = (n: NotifType) => {
+      setNotifs((prev) => [...prev, n]);
+      setTimeout(() => {
+        setNotifs((prev) => prev.filter((x) => x.id !== n.id));
+      }, 8000);
+    };
+    notifListeners.push(handler);
+    return () => {
+      notifListeners = notifListeners.filter((fn) => fn !== handler);
+    };
+  }, []);
+  if (notifs.length === 0) return null;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: "24px",
+        right: "24px",
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px",
+        alignItems: "flex-end",
+        maxWidth: "380px",
+      }}
+    >
+      {notifs.map((n) => (
+        <div
+          key={n.id}
+          style={{
+            background:
+              n.type === "warning"
+                ? "linear-gradient(135deg, #FF8C42 0%, #FFB347 100%)"
+                : "linear-gradient(135deg, #8E5C9F 0%, #C084DE 100%)",
+            color: "#fff",
+            borderRadius: "16px",
+            padding: "14px 16px",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            minWidth: "300px",
+            animation: "slideInRight 0.3s ease-out",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "22px",
+              lineHeight: 1,
+              flexShrink: 0,
+              marginTop: "2px",
+            }}
+          >
+            {n.type === "warning" ? "💊" : "🗓️"}
+          </div>
+          <div style={{ flex: 1 }}>
+            <p
+              style={{
+                fontWeight: 700,
+                fontSize: "13px",
+                margin: "0 0 4px",
+                lineHeight: 1.2,
+              }}
+            >
+              {n.type === "warning"
+                ? "⚠️ Medicine Stock Alert"
+                : "📌 Checkup Reminder"}
+            </p>
+            <p
+              style={{
+                fontSize: "13px",
+                margin: 0,
+                lineHeight: 1.5,
+                opacity: 0.95,
+              }}
+            >
+              {n.message}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              setNotifs((prev) => prev.filter((x) => x.id !== n.id))
+            }
+            style={{
+              background: "rgba(255,255,255,0.25)",
+              border: "none",
+              borderRadius: "50%",
+              width: "22px",
+              height: "22px",
+              cursor: "pointer",
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: "14px",
+              lineHeight: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+            aria-label="Dismiss notification"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+      <style>
+        {
+          "@keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }"
+        }
+      </style>
+    </div>
+  );
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface MonthData {
+  month: number;
+  fruit: string;
+  fruitEmoji: string;
+  size: string;
+  weight: string;
+  bodyChanges: string[];
+  tips: string[];
+  dietPlan: {
+    breakfast: string;
+    lunch: string;
+    dinner: string;
+    snacks: string;
+    nutrients: string;
+  };
+}
+
+interface Message {
+  id: number;
+  role: "user" | "ai";
+  text: string;
+  timestamp: Date;
+  isTyping?: boolean;
+}
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+const MONTH_DATA: MonthData[] = [
+  {
+    month: 1,
+    fruit: "Poppy Seed",
+    fruitEmoji: "🌱",
+    size: "0.1 cm",
+    weight: "< 1g",
+    bodyChanges: [
+      "Implantation occurs in uterus",
+      "Hormonal surge begins (hCG rises)",
+      "Possible light spotting or cramping",
+      "Fatigue may set in early",
+    ],
+    tips: [
+      "Start folic acid 400-800mcg daily",
+      "Avoid alcohol, smoking, raw fish",
+      "Schedule first prenatal visit",
+      "Track your cycle and symptoms",
+    ],
+    dietPlan: {
+      breakfast: "Fortified cereal with milk & berries",
+      lunch: "Spinach salad with chickpeas & lemon dressing",
+      dinner: "Lentil soup with whole grain bread",
+      snacks: "Almonds, orange slices",
+      nutrients: "Folic acid, Iron, Vitamin B6",
+    },
+  },
+  {
+    month: 2,
+    fruit: "Raspberry",
+    fruitEmoji: "🫐",
+    size: "1.6 cm",
+    weight: "1g",
+    bodyChanges: [
+      "Morning sickness peaks (nausea/vomiting)",
+      "Breast tenderness and swelling",
+      "Heightened sense of smell",
+      "Frequent urination begins",
+    ],
+    tips: [
+      "Eat small, frequent meals every 2-3 hrs",
+      "Ginger tea or crackers for nausea",
+      "Stay well hydrated (8-10 glasses/day)",
+      "Avoid strong odors and greasy foods",
+    ],
+    dietPlan: {
+      breakfast: "Plain crackers with peanut butter & banana",
+      lunch: "Chicken broth soup with toast",
+      dinner: "Steamed fish with brown rice & veggies",
+      snacks: "Yogurt, apple slices with honey",
+      nutrients: "Vitamin B6, Magnesium, Zinc",
+    },
+  },
+  {
+    month: 3,
+    fruit: "Lime",
+    fruitEmoji: "🍋",
+    size: "7.4 cm",
+    weight: "23g",
+    bodyChanges: [
+      "Nausea begins to ease for many",
+      "Energy levels start returning",
+      "Uterus size of an orange now",
+      "Risk of miscarriage decreases significantly",
+    ],
+    tips: [
+      "Schedule nuchal translucency scan",
+      "Begin gentle prenatal yoga or walking",
+      "Stay active with light exercise",
+      "Share pregnancy news when comfortable",
+    ],
+    dietPlan: {
+      breakfast: "Greek yogurt parfait with granola & fruit",
+      lunch: "Whole wheat pasta with tomato & spinach",
+      dinner: "Grilled chicken breast with sweet potato",
+      snacks: "Walnuts, dried apricots",
+      nutrients: "Calcium, Vitamin D, Protein",
+    },
+  },
+  {
+    month: 4,
+    fruit: "Avocado",
+    fruitEmoji: "🥑",
+    size: "14 cm",
+    weight: "100g",
+    bodyChanges: [
+      "Baby bump becomes visible",
+      "Nausea mostly gone - appetite returns",
+      "May feel first flutters of movement",
+      "Round ligament pain as uterus grows",
+    ],
+    tips: [
+      "Start sleeping on your side (left preferred)",
+      "Use a pregnancy pillow for support",
+      "Moisturize belly to prevent stretch marks",
+      "Begin prenatal classes research",
+    ],
+    dietPlan: {
+      breakfast: "Avocado toast on whole grain with poached egg",
+      lunch: "Quinoa bowl with roasted vegetables & feta",
+      dinner: "Salmon with asparagus and brown rice",
+      snacks: "Hummus with veggie sticks, dates",
+      nutrients: "Omega-3, Iron, Folate, Vitamin C",
+    },
+  },
+  {
+    month: 5,
+    fruit: "Mango",
+    fruitEmoji: "🥭",
+    size: "25 cm",
+    weight: "300g",
+    bodyChanges: [
+      "Clearly feel baby kicking and moving",
+      "Skin changes - linea nigra appears",
+      "Possible leg cramps at night",
+      "Nasal congestion due to hormones",
+    ],
+    tips: [
+      "Count fetal movements daily",
+      "Do leg stretches before bed",
+      "Use a humidifier for nasal congestion",
+      "Consider maternity clothes now",
+    ],
+    dietPlan: {
+      breakfast: "Smoothie with mango, spinach & protein powder",
+      lunch: "Lentil dal with basmati rice & raita",
+      dinner: "Turkey meatballs with zucchini noodles",
+      snacks: "Mango slices, boiled eggs",
+      nutrients: "Vitamin A, Iron, Potassium, Protein",
+    },
+  },
+  {
+    month: 6,
+    fruit: "Corn",
+    fruitEmoji: "🌽",
+    size: "30 cm",
+    weight: "660g",
+    bodyChanges: [
+      "Back pain increases as bump grows",
+      "Braxton Hicks practice contractions begin",
+      "Heartburn and indigestion common",
+      "Swelling in feet and ankles",
+    ],
+    tips: [
+      "Prenatal massage for back pain relief",
+      "Sleep with a supportive wedge pillow",
+      "Eat smaller meals to reduce heartburn",
+      "Elevate feet when resting",
+    ],
+    dietPlan: {
+      breakfast: "Oatmeal with flaxseed, honey & almonds",
+      lunch: "Grilled vegetable and cheese wrap",
+      dinner: "Beef stew with carrots and potatoes",
+      snacks: "Cottage cheese with pineapple, crackers",
+      nutrients: "Calcium, Magnesium, Fiber, Vitamin K",
+    },
+  },
+  {
+    month: 7,
+    fruit: "Eggplant",
+    fruitEmoji: "🍆",
+    size: "36 cm",
+    weight: "900g",
+    bodyChanges: [
+      "Shortness of breath as baby grows up",
+      "More frequent Braxton Hicks",
+      "Possible hemorrhoids and varicose veins",
+      "Baby's kicks are strong and regular",
+    ],
+    tips: [
+      "Attend childbirth preparation classes",
+      "Start preparing your hospital bag",
+      "Practice breathing exercises daily",
+      "Keep track of kick counts morning & night",
+    ],
+    dietPlan: {
+      breakfast: "Whole grain pancakes with strawberries & cream",
+      lunch: "Chickpea and spinach curry with naan",
+      dinner: "Grilled tilapia with mashed sweet potato",
+      snacks: "Trail mix with nuts & dried berries, milk",
+      nutrients: "DHA, Iron, Calcium, Vitamin D",
+    },
+  },
+  {
+    month: 8,
+    fruit: "Pineapple",
+    fruitEmoji: "🍍",
+    size: "41 cm",
+    weight: "1.8kg",
+    bodyChanges: [
+      "Baby drops into pelvis (lightening)",
+      "Frequent urination intensifies",
+      "Pelvic pressure and discomfort",
+      "Possible colostrum leaking from breasts",
+    ],
+    tips: [
+      "Finalize birth plan with your doctor",
+      "Tour the maternity ward/hospital",
+      "Rest as much as possible",
+      "Avoid long standing or sitting periods",
+    ],
+    dietPlan: {
+      breakfast: "Scrambled eggs with spinach & whole grain toast",
+      lunch: "Bean and vegetable soup with crusty bread",
+      dinner: "Baked chicken thigh with roasted broccoli",
+      snacks: "Pineapple chunks, cheese and crackers",
+      nutrients: "Protein, Iron, Folate, Vitamin C",
+    },
+  },
+  {
+    month: 9,
+    fruit: "Watermelon",
+    fruitEmoji: "🍉",
+    size: "46 cm",
+    weight: "2.8kg",
+    bodyChanges: [
+      "Cervix begins to thin and dilate",
+      "Strong nesting instinct kicks in",
+      "Increased pelvic pressure and pain",
+      "Mucus plug may release (bloody show)",
+    ],
+    tips: [
+      "Rest and conserve energy now",
+      "Monitor contractions with a timer app",
+      "Ensure hospital bag is fully packed",
+      "Practice relaxation techniques daily",
+    ],
+    dietPlan: {
+      breakfast: "Banana oat smoothie with almond butter",
+      lunch: "Caesar salad with grilled shrimp",
+      dinner: "Pasta with marinara, mozzarella & basil",
+      snacks: "Watermelon slices, dates with almond butter",
+      nutrients: "Complex carbs, Magnesium, B vitamins",
+    },
+  },
+  {
+    month: 10,
+    fruit: "Pumpkin",
+    fruitEmoji: "🎃",
+    size: "50 cm",
+    weight: "3.4kg",
+    bodyChanges: [
+      "Baby is full term - ready for birth!",
+      "Intense pressure in pelvis and hips",
+      "Water may break (amniotic fluid)",
+      "True labor contractions begin (5-1-1 rule)",
+    ],
+    tips: [
+      "Watch for 5-1-1 contraction pattern",
+      "Head to hospital when contractions 5 min apart",
+      "Stay calm and trust your body",
+      "Stay hydrated and eat light foods",
+    ],
+    dietPlan: {
+      breakfast: "Light oatmeal with honey - easy to digest",
+      lunch: "Clear broth soup with soft vegetables",
+      dinner: "Simple rice with steamed chicken",
+      snacks: "Toast, bananas, light fruits only",
+      nutrients: "Stay hydrated, light carbs for energy",
+    },
+  },
+];
+
+const SEGMENT_COLORS = [
+  "#F9C6D0",
+  "#FDDCB5",
+  "#E8D5F5",
+  "#C8E6F9",
+  "#F9C6D0",
+  "#FDDCB5",
+  "#E8D5F5",
+  "#C8E6F9",
+  "#F9C6D0",
+  "#FDDCB5",
+];
+
+const CURRENT_MONTH = 7;
+
+const BABY_IMAGES = [
+  "/assets/generated/baby-dev-month1-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month2-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month3-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month4-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month5-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month6-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month7-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month8-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month9-transparent.dim_120x120.png",
+  "/assets/generated/baby-dev-month10-transparent.dim_120x120.png",
+];
+
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+function HeartIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      viewBox="0 0 24 24"
+      fill="#E0524D"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M12 21.593c-.525-.438-10.5-8.6-10.5-13.093 0-3.309 2.691-6 6-6 1.893 0 3.568.882 4.5 2.25.932-1.368 2.607-2.25 4.5-2.25 3.309 0 6 2.691 6 6 0 4.493-9.975 12.655-10.5 13.093z" />
+    </svg>
+  );
+}
+
+function PillIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+    >
+      <rect
+        x="3"
+        y="9"
+        width="18"
+        height="6"
+        rx="3"
+        fill="#8E5C9F"
+        opacity="0.15"
+        stroke="#8E5C9F"
+        strokeWidth="1.5"
+      />
+      <line x1="12" y1="9" x2="12" y2="15" stroke="#8E5C9F" strokeWidth="1.5" />
+      <rect
+        x="3"
+        y="9"
+        width="9"
+        height="6"
+        rx="3"
+        fill="#8E5C9F"
+        opacity="0.4"
+      />
+    </svg>
+  );
+}
+
+function WarningIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+    >
+      <path
+        d="M24 6 L44 40 H4 Z"
+        fill="rgba(255,255,255,0.15)"
+        stroke="white"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <line
+        x1="24"
+        y1="19"
+        x2="24"
+        y2="29"
+        stroke="white"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
+      <circle cx="24" cy="34" r="2" fill="white" />
+    </svg>
+  );
+}
+
+function SendIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="18"
+      height="18"
+      viewBox="0 0 18 18"
+      fill="none"
+    >
+      <path
+        d="M15.5 2.5 L1 8.5 L7.5 9.5 L9 16.5 Z"
+        fill="white"
+        stroke="white"
+        strokeWidth="0.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+// ─── Circular Timeline ────────────────────────────────────────────────────────
+function getSegmentPath(
+  cx: number,
+  cy: number,
+  innerR: number,
+  outerR: number,
+  startAngle: number,
+  endAngle: number,
+) {
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const si = {
+    x: cx + innerR * Math.cos(toRad(startAngle)),
+    y: cy + innerR * Math.sin(toRad(startAngle)),
+  };
+  const ei = {
+    x: cx + innerR * Math.cos(toRad(endAngle)),
+    y: cy + innerR * Math.sin(toRad(endAngle)),
+  };
+  const so = {
+    x: cx + outerR * Math.cos(toRad(startAngle)),
+    y: cy + outerR * Math.sin(toRad(startAngle)),
+  };
+  const eo = {
+    x: cx + outerR * Math.cos(toRad(endAngle)),
+    y: cy + outerR * Math.sin(toRad(endAngle)),
+  };
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return [
+    `M ${si.x} ${si.y}`,
+    `L ${so.x} ${so.y}`,
+    `A ${outerR} ${outerR} 0 ${largeArc} 1 ${eo.x} ${eo.y}`,
+    `L ${ei.x} ${ei.y}`,
+    `A ${innerR} ${innerR} 0 ${largeArc} 0 ${si.x} ${si.y}`,
+    "Z",
+  ].join(" ");
+}
+
+function MonthDetailCard({
+  data,
+  onClose,
+}: { data: MonthData; onClose: () => void }) {
+  const mealItems = [
+    { label: "🌅 Breakfast", value: data.dietPlan.breakfast },
+    { label: "☀️ Lunch", value: data.dietPlan.lunch },
+    { label: "🌙 Dinner", value: data.dietPlan.dinner },
+    { label: "🍎 Snacks", value: data.dietPlan.snacks },
+  ];
+
+  return (
+    <div
+      className="animate-fade-in bg-white rounded-2xl p-5"
+      style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.15)" }}
+    >
+      {/* Header */}
+      <div className="flex justify-between items-start mb-4">
+        <h3 className="text-lg font-bold" style={{ color: "#2B1F3A" }}>
+          Month {data.month} Details
+        </h3>
+        <button
+          type="button"
+          data-ocid="timeline.close_button"
+          onClick={onClose}
+          className="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-gray-100"
+          style={{ color: "#7A7386" }}
+        >
+          <svg
+            aria-hidden="true"
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+          >
+            <path
+              d="M1 1 L13 13 M13 1 L1 13"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* Baby Size Section */}
+      <div
+        className="flex items-center gap-4 mb-4 p-4 rounded-2xl"
+        style={{
+          background: "linear-gradient(135deg, #F8F4FB 0%, #EDE0FA 100%)",
+        }}
+      >
+        <div
+          className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{
+            background: "white",
+            boxShadow: "0 4px 16px rgba(142,92,159,0.18)",
+          }}
+        >
+          <img
+            src={BABY_IMAGES[data.month - 1]}
+            alt={`Baby at month ${data.month}`}
+            width={64}
+            height={64}
+            style={{ objectFit: "contain" }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-2xl">{data.fruitEmoji}</span>
+            <p className="font-bold text-base" style={{ color: "#8E5C9F" }}>
+              Size of a {data.fruit}
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <span
+              className="text-xs font-semibold px-2 py-1 rounded-full"
+              style={{ background: "#E8D5F5", color: "#8E5C9F" }}
+            >
+              📏 {data.size}
+            </span>
+            <span
+              className="text-xs font-semibold px-2 py-1 rounded-full"
+              style={{ background: "#E8D5F5", color: "#8E5C9F" }}
+            >
+              ⚖️ {data.weight}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Body Changes */}
+      <div className="mb-4 p-4 rounded-2xl" style={{ background: "#F8F4FB" }}>
+        <p
+          className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2"
+          style={{ color: "#8E5C9F" }}
+        >
+          <span>🤰</span> Body Changes
+        </p>
+        <ul className="space-y-2">
+          {data.bodyChanges.map((change) => (
+            <li key={change} className="flex items-start gap-2">
+              <span
+                className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                style={{ background: "#C07FD8" }}
+              />
+              <span className="text-sm" style={{ color: "#5B5566" }}>
+                {change}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Health Tips */}
+      <div className="mb-4 p-4 rounded-2xl" style={{ background: "#F0FAF7" }}>
+        <p
+          className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2"
+          style={{ color: "#2A9D6A" }}
+        >
+          <span>💡</span> Health Tips
+        </p>
+        <ul className="space-y-2">
+          {data.tips.map((tip) => (
+            <li key={tip} className="flex items-start gap-2">
+              <span className="text-green-500 flex-shrink-0 mt-0.5 font-bold">
+                ✓
+              </span>
+              <span className="text-sm" style={{ color: "#5B5566" }}>
+                {tip}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Monthly Diet Plan */}
+      <div className="p-4 rounded-2xl" style={{ background: "#FFF8F0" }}>
+        <p
+          className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2"
+          style={{ color: "#D4821A" }}
+        >
+          <span>🥗</span> Monthly Diet Plan
+        </p>
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          {mealItems.map((meal) => (
+            <div
+              key={meal.label}
+              className="p-3 rounded-xl"
+              style={{
+                background: "white",
+                boxShadow: "0 2px 8px rgba(212,130,26,0.08)",
+              }}
+            >
+              <p
+                className="text-xs font-semibold mb-1"
+                style={{ color: "#D4821A" }}
+              >
+                {meal.label}
+              </p>
+              <p
+                className="text-xs leading-relaxed"
+                style={{ color: "#5B5566" }}
+              >
+                {meal.value}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div
+          className="px-3 py-2 rounded-full text-center"
+          style={{
+            background: "linear-gradient(90deg, #FDE8C8 0%, #FDDCB5 100%)",
+          }}
+        >
+          <span className="text-xs font-semibold" style={{ color: "#A05A1A" }}>
+            🌟 Key Nutrients: {data.dietPlan.nutrients}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Baby360Viewer({ selectedMonth }: { selectedMonth: number | null }) {
+  const displayMonth =
+    selectedMonth !== null ? selectedMonth + 1 : CURRENT_MONTH;
+  return (
+    <div
+      className="bg-white rounded-2xl p-5 mb-6"
+      style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
+    >
+      <p className="font-bold text-base mb-3" style={{ color: "#2B1F3A" }}>
+        Baby at Month {displayMonth}
+      </p>
+      <div className="flex justify-center">
+        <div
+          style={{
+            width: 240,
+            height: 240,
+            borderRadius: 20,
+            background: "linear-gradient(135deg, #F8F4FB 0%, #EDE0FA 100%)",
+            boxShadow: "0 4px 20px rgba(142,92,159,0.2)",
+            overflow: "hidden",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <img
+            src={BABY_IMAGES[displayMonth - 1]}
+            alt={`Baby at month ${displayMonth}`}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CircularTimeline({
+  selectedMonth,
+  setSelectedMonth,
+}: {
+  selectedMonth: number | null;
+  setSelectedMonth: (m: number | null) => void;
+}) {
+  const [hoveredMonth, setHoveredMonth] = useState<number | null>(null);
+  const cx = 200;
+  const cy = 200;
+  const innerR = 90;
+  const outerR = 175;
+  const labelR = 140;
+  const illustR = 118;
+  const segmentAngle = 36;
+  const startOffset = -90;
+
+  const progressCircumference = 2 * Math.PI * 185;
+  const progressDash = progressCircumference * 0.7;
+
+  return (
+    <div id="timeline" className="mb-8">
+      <h2 className="text-lg font-semibold mb-4" style={{ color: "#2B1F3A" }}>
+        Pregnancy Timeline
+      </h2>
+      <div
+        className="bg-white rounded-2xl p-4"
+        style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
+      >
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 400 400"
+          width="100%"
+          style={{ display: "block", maxWidth: "400px", margin: "0 auto" }}
+        >
+          <defs>
+            <filter
+              id="glowFilter"
+              x="-20%"
+              y="-20%"
+              width="140%"
+              height="140%"
+            >
+              <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            {SEGMENT_COLORS.map((color, i) => {
+              const gradId = `grad${i}`;
+              return (
+                <radialGradient
+                  key={gradId}
+                  id={gradId}
+                  cx="50%"
+                  cy="50%"
+                  r="50%"
+                >
+                  <stop offset="0%" stopColor={color} stopOpacity="0.9" />
+                  <stop offset="100%" stopColor={color} stopOpacity="0.6" />
+                </radialGradient>
+              );
+            })}
+            {MONTH_DATA.map((md, i) => {
+              const toRad = (deg: number) => (deg * Math.PI) / 180;
+              const startOffset = -90;
+              const segmentAngle = 36;
+              const illustR = 118;
+              const cx2 = 200;
+              const cy2 = 200;
+              const midAngle =
+                startOffset + i * segmentAngle + segmentAngle / 2;
+              const ix = cx2 + illustR * Math.cos(toRad(midAngle));
+              const iy = cy2 + illustR * Math.sin(toRad(midAngle));
+              const r = md.month === 6 ? 16 : 14;
+              return (
+                // biome-ignore lint/suspicious/noArrayIndexKey: stable index-based SVG clip IDs
+                <clipPath key={`clip${i}`} id={`imgClip${i}`}>
+                  <circle cx={ix} cy={iy} r={r} />
+                </clipPath>
+              );
+            })}
+            <clipPath id="centerClip">
+              <circle cx="200" cy="200" r="26" />
+            </clipPath>
+          </defs>
+
+          {/* Outer progress ring */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={185}
+            fill="none"
+            stroke="#E8DDF7"
+            strokeWidth={4}
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r={185}
+            fill="none"
+            stroke="#8E5C9F"
+            strokeWidth={4}
+            strokeDasharray={`${progressDash} ${progressCircumference}`}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${cx} ${cy})`}
+          />
+
+          {/* Segments */}
+          {MONTH_DATA.map((md, i) => {
+            const startAngle = startOffset + i * segmentAngle;
+            const endAngle = startAngle + segmentAngle - 1.5;
+            const midAngle = startAngle + segmentAngle / 2;
+            const toRad = (deg: number) => (deg * Math.PI) / 180;
+            const lx = cx + labelR * Math.cos(toRad(midAngle));
+            const ly = cy + labelR * Math.sin(toRad(midAngle));
+            const ix = cx + illustR * Math.cos(toRad(midAngle));
+            const iy = cy + illustR * Math.sin(toRad(midAngle));
+            const isCurrent = md.month === CURRENT_MONTH;
+            const isHovered = hoveredMonth === i;
+            const path = getSegmentPath(
+              cx,
+              cy,
+              innerR,
+              outerR,
+              startAngle,
+              endAngle,
+            );
+            const scale = isHovered ? 1.04 : 1;
+
+            return (
+              <g
+                key={md.month}
+                tabIndex={0}
+                style={{
+                  cursor: "pointer",
+                  transformOrigin: `${cx}px ${cy}px`,
+                  transform: `scale(${scale})`,
+                  transition: "transform 0.2s ease",
+                }}
+                className={isCurrent ? "segment-current" : ""}
+                onClick={() => setSelectedMonth(selectedMonth === i ? null : i)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ")
+                    setSelectedMonth(selectedMonth === i ? null : i);
+                }}
+                onMouseEnter={() => setHoveredMonth(i)}
+                onMouseLeave={() => setHoveredMonth(null)}
+                data-ocid={`timeline.item.${i + 1}`}
+              >
+                <path
+                  d={path}
+                  fill={`url(#grad${i})`}
+                  stroke="white"
+                  strokeWidth={isCurrent ? 2.5 : 1.5}
+                  filter={isCurrent ? "url(#glowFilter)" : undefined}
+                />
+                {isCurrent && (
+                  <path
+                    d={path}
+                    fill="none"
+                    stroke="#8E5C9F"
+                    strokeWidth={2.5}
+                    opacity={0.6}
+                  />
+                )}
+                <text
+                  x={lx}
+                  y={ly + 4}
+                  textAnchor="middle"
+                  fontSize={isCurrent ? "11" : "9.5"}
+                  fontWeight={isCurrent ? "700" : "500"}
+                  fill={isCurrent ? "#8E5C9F" : "#5B5566"}
+                  style={{ pointerEvents: "none" }}
+                >
+                  M{md.month}
+                </text>
+                <circle
+                  cx={ix}
+                  cy={iy}
+                  r={isCurrent ? 16 : 14}
+                  fill="white"
+                  style={{ pointerEvents: "none" }}
+                />
+                <image
+                  href={BABY_IMAGES[i]}
+                  x={isCurrent ? ix - 16 : ix - 14}
+                  y={isCurrent ? iy - 16 : iy - 14}
+                  width={isCurrent ? 32 : 28}
+                  height={isCurrent ? 32 : 28}
+                  style={{ pointerEvents: "none" }}
+                  preserveAspectRatio="xMidYMid slice"
+                  clipPath={`url(#imgClip${i})`}
+                />
+              </g>
+            );
+          })}
+
+          {/* Center circle */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r={82}
+            fill="white"
+            filter="url(#glowFilter)"
+          />
+          <circle cx={cx} cy={cy} r={78} fill="white" />
+          <image
+            href={BABY_IMAGES[CURRENT_MONTH - 1]}
+            x={cx - 28}
+            y={cy - 72}
+            width={56}
+            height={56}
+            preserveAspectRatio="xMidYMid meet"
+          />
+          <text
+            x={cx}
+            y={cy - 10}
+            textAnchor="middle"
+            fontSize="13"
+            fontWeight="700"
+            fill="#8E5C9F"
+          >
+            Month {CURRENT_MONTH}
+          </text>
+          <text
+            x={cx}
+            y={cy + 8}
+            textAnchor="middle"
+            fontSize="11"
+            fill="#7A7386"
+          >
+            Week 24
+          </text>
+          <text
+            x={cx}
+            y={cy + 26}
+            textAnchor="middle"
+            fontSize="9.5"
+            fill="#CDB9E9"
+          >
+            112 days left
+          </text>
+        </svg>
+
+        <p
+          className="text-center text-xs mt-2 mb-1"
+          style={{ color: "#7A7386" }}
+        >
+          Tap a segment to see month details
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Components ───────────────────────────────────────────────────────────────
+function NavBar({ onLogout }: { onLogout: () => void }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("dashboard");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const sectionIds = ["dashboard", "timeline", "wellness", "connect"];
+    const observers: IntersectionObserver[] = [];
+
+    for (const id of sectionIds) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(id);
+        },
+        { rootMargin: "-40% 0px -50% 0px", threshold: 0 },
+      );
+      observer.observe(el);
+      observers.push(observer);
+    }
+
+    return () => {
+      for (const o of observers) o.disconnect();
+    };
+  }, []);
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    id: string,
+  ) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      const navHeight = 64;
+      const top =
+        el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
+
+  const navItems = ["Dashboard", "Timeline", "Wellness", "Connect"];
+
+  return (
+    <nav
+      className="sticky top-0 z-50 px-4 transition-all duration-300"
+      style={{
+        background: scrolled ? "rgba(255,255,255,0.95)" : "#ffffff",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+        boxShadow: scrolled
+          ? "0 4px 24px rgba(142,92,159,0.18)"
+          : "0 2px 12px rgba(142,92,159,0.08)",
+        paddingTop: scrolled ? "6px" : "8px",
+        paddingBottom: scrolled ? "6px" : "8px",
+      }}
+      data-ocid="nav.panel"
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <img
+            src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
+            alt="Mothera – Maternal Health Care"
+            className="transition-all duration-300"
+            style={{
+              height: scrolled ? "44px" : "56px",
+              width: "auto",
+              objectFit: "contain",
+            }}
+          />
+          <span
+            className="font-bold transition-all duration-300"
+            style={{ color: "#8E5C9F", fontSize: scrolled ? "18px" : "20px" }}
+          >
+            Mothera
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="hidden md:flex items-center gap-1">
+            {navItems.map((item, i) => {
+              const id = item.toLowerCase();
+              const isActive = activeSection === id;
+              return (
+                <a
+                  key={item}
+                  href={`#${id}`}
+                  onClick={(e) => handleNavClick(e, id)}
+                  data-ocid={`nav.link.${i + 1}`}
+                  className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300"
+                  style={
+                    isActive
+                      ? {
+                          background: "#E8D5F5",
+                          color: "#8E5C9F",
+                          transform: "scale(1.05)",
+                        }
+                      : { color: "#7A7386", background: "transparent" }
+                  }
+                >
+                  {item}
+                </a>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            onClick={onLogout}
+            data-ocid="nav.button"
+            className="ml-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-200"
+            style={{
+              background: "#F0E8FA",
+              color: "#8E5C9F",
+              border: "1.5px solid #D8C0F0",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#E0D0F5";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "#F0E8FA";
+            }}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function Header({
+  selectedMonth: _selectedMonth,
+  userName,
+  userInfo,
+}: {
+  selectedMonth: number | null;
+  userName: string;
+  userInfo: UserInfo | null;
+}) {
+  return (
+    <div id="dashboard" className="mb-6 pt-6">
+      <div className="flex items-center gap-2 mb-1">
+        <h1 className="text-3xl font-extrabold" style={{ color: "#2B1F3A" }}>
+          Hello, {userName ? userName : "Mom"}!
+        </h1>
+        <HeartIcon className="w-7 h-7" />
+      </div>
+      {(userInfo?.bloodGroup ||
+        userInfo?.dueDate ||
+        userInfo?.pregnancyWeek) && (
+        <div className="flex flex-wrap gap-2 mt-2">
+          {userInfo?.bloodGroup && (
+            <span className="rounded-full bg-purple-100 text-purple-700 text-xs px-3 py-1 font-medium">
+              Blood: {userInfo.bloodGroup}
+            </span>
+          )}
+          {userInfo?.dueDate && (
+            <span className="rounded-full bg-purple-100 text-purple-700 text-xs px-3 py-1 font-medium">
+              Due:{" "}
+              {new Date(userInfo.dueDate).toLocaleDateString("en-IN", {
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          )}
+          {userInfo?.pregnancyWeek && (
+            <span className="rounded-full bg-purple-100 text-purple-700 text-xs px-3 py-1 font-medium">
+              Week {userInfo.pregnancyWeek}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PregnancyTracker() {
+  const [progress, setProgress] = useState(0);
+  const targetProgress = 60;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setProgress(targetProgress), 300);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div
+      className="bg-white rounded-2xl p-5 mb-6"
+      style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
+    >
+      <p className="text-sm font-semibold mb-2" style={{ color: "#7A7386" }}>
+        Pregnancy Tracker
+      </p>
+      <p
+        className="text-3xl font-extrabold mb-0.5"
+        style={{ color: "#8E5C9F" }}
+      >
+        Week 24 of 40
+      </p>
+      <p className="text-sm mb-4" style={{ color: "#7A7386" }}>
+        112 days remaining
+      </p>
+      <div
+        className="relative h-3 rounded-full overflow-hidden mb-2"
+        style={{ background: "#F0E8FA" }}
+      >
+        <div
+          className="h-full rounded-full transition-all duration-1000 ease-out"
+          style={{
+            width: `${progress}%`,
+            background: "linear-gradient(90deg, #8E5C9F, #C8E6F9)",
+          }}
+        />
+      </div>
+      <div className="flex justify-between">
+        <span className="text-xs" style={{ color: "#CDB9E9" }}>
+          Conception
+        </span>
+        <span className="text-xs font-medium" style={{ color: "#8E5C9F" }}>
+          {progress}% complete
+        </span>
+        <span className="text-xs" style={{ color: "#CDB9E9" }}>
+          Due Date
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ─── Medicine Reminder Types ─────────────────────────────────────────────────
+interface MedicineEntry {
+  id: number;
+  name: string;
+  amount: number | "";
+  times: string[];
+  timeInputs: Record<string, string>;
+  whenToTake: "before" | "after" | "";
+}
+
+let medicineIdCounter = 1;
+
+function MedicineReminderPanel({
+  onSave,
+  onSaveWithCount,
+}: {
+  onSave?: () => void;
+  onSaveWithCount?: (entries: MedicineEntry[]) => void;
+}) {
+  const [entries, setEntries] = useState<MedicineEntry[]>([
+    {
+      id: medicineIdCounter++,
+      name: "",
+      amount: "",
+      times: [],
+      timeInputs: {},
+      whenToTake: "",
+    },
+  ]);
+  const [doneIds, setDoneIds] = useState<Set<number>>(new Set());
+
+  const markDone = (id: number) => setDoneIds((prev) => new Set([...prev, id]));
+  const unmarkDone = (id: number) =>
+    setDoneIds((prev) => {
+      const s = new Set(prev);
+      s.delete(id);
+      return s;
+    });
+
+  const addEntry = () => {
+    setEntries((prev) => [
+      ...prev,
+      {
+        id: medicineIdCounter++,
+        name: "",
+        amount: "",
+        times: [],
+        timeInputs: {},
+        whenToTake: "",
+      },
+    ]);
+  };
+
+  const removeEntry = (id: number) => {
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  const updateName = (id: number, name: string) => {
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, name } : e)));
+  };
+
+  const updateAmount = (id: number, amount: number | "") => {
+    setEntries((prev) => prev.map((e) => (e.id === id ? { ...e, amount } : e)));
+  };
+
+  const toggleTime = (id: number, time: string) => {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id === id
+          ? {
+              ...e,
+              times: e.times.includes(time)
+                ? e.times.filter((t) => t !== time)
+                : [...e.times, time],
+            }
+          : e,
+      ),
+    );
+  };
+
+  const setWhen = (id: number, whenToTake: "before" | "after") => {
+    setEntries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, whenToTake } : e)),
+    );
+  };
+
+  const updateTimeInput = (id: number, timePeriod: string, value: string) => {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id === id
+          ? { ...e, timeInputs: { ...e.timeInputs, [timePeriod]: value } }
+          : e,
+      ),
+    );
+  };
+
+  const timeOptions = ["Morning", "Afternoon", "Night"];
+
+  return (
+    <div
+      className="rounded-b-2xl px-4 pb-4 pt-3"
+      style={{ background: "#F8F2FF", borderTop: "1px solid #E8D5F5" }}
+    >
+      {entries.map((entry, idx) => (
+        <div key={entry.id}>
+          {idx > 0 && (
+            <div className="my-3" style={{ borderTop: "1px dashed #CDB9E9" }} />
+          )}
+          {doneIds.has(entry.id) ? (
+            <div className="flex flex-col items-center gap-2 py-3">
+              <div className="relative" style={{ width: 90, height: 90 }}>
+                <svg
+                  width="90"
+                  height="90"
+                  viewBox="0 0 90 90"
+                  aria-hidden="true"
+                >
+                  <circle
+                    cx="45"
+                    cy="45"
+                    r={36}
+                    fill="none"
+                    stroke="#E8D5F5"
+                    strokeWidth="8"
+                  />
+                  <circle
+                    cx="45"
+                    cy="45"
+                    r={36}
+                    fill="none"
+                    stroke="#8E5C9F"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 36} ${2 * Math.PI * 36}`}
+                    strokeDashoffset={2 * Math.PI * 36 * 0.25}
+                    style={{ transition: "stroke-dasharray 0.5s ease" }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
+                  <span
+                    className="font-bold leading-tight"
+                    style={{
+                      color: "#2B1F3A",
+                      fontSize:
+                        entry.name.length > 8
+                          ? "8px"
+                          : entry.name.length > 5
+                            ? "9px"
+                            : "11px",
+                      maxWidth: "64px",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {entry.name || "Medicine"}
+                  </span>
+                  {typeof entry.amount === "number" && entry.amount > 0 && (
+                    <span
+                      className="text-xs font-semibold"
+                      style={{ color: "#8E5C9F", marginTop: "2px" }}
+                    >
+                      ×{entry.amount}
+                    </span>
+                  )}
+                </div>
+              </div>
+              {entry.times.length > 0 && (
+                <p className="text-xs text-center" style={{ color: "#7A7386" }}>
+                  {entry.times
+                    .map((t) => {
+                      const raw = entry.timeInputs[t];
+                      if (!raw) return t;
+                      const [hStr, mStr] = raw.split(":");
+                      const h = Number.parseInt(hStr, 10);
+                      const m = mStr;
+                      const ampm = h >= 12 ? "PM" : "AM";
+                      const h12 = h % 12 || 12;
+                      return `${t} ${h12}:${m} ${ampm}`;
+                    })
+                    .join(", ")}
+                  {entry.whenToTake ? ` · ${entry.whenToTake} food` : ""}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => unmarkDone(entry.id)}
+                className="text-xs font-semibold mt-1"
+                style={{ color: "#8E5C9F" }}
+              >
+                Edit
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {/* Header row */}
+              <div className="flex items-center justify-between">
+                <span
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ color: "#8E5C9F" }}
+                >
+                  Medicine {idx + 1}
+                </span>
+                {entries.length > 1 && (
+                  <button
+                    type="button"
+                    data-ocid={`medicine.delete_button.${idx + 1}`}
+                    onClick={() => removeEntry(entry.id)}
+                    className="w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                    style={{ background: "#F0E8FA", color: "#8E5C9F" }}
+                    aria-label="Remove medicine"
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M2 2l8 8M10 2l-8 8"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* Medicine name input */}
+              <input
+                type="text"
+                data-ocid={`medicine.input.${idx + 1}`}
+                value={entry.name}
+                onChange={(e) => updateName(entry.id, e.target.value)}
+                placeholder="Medicine name..."
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none transition-all"
+                style={{
+                  background: "#fff",
+                  border: "1.5px solid #E8D5F5",
+                  color: "#2B1F3A",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "#8E5C9F";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 0 3px rgba(142,92,159,0.12)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#E8D5F5";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              />
+
+              {/* Amount input */}
+              <input
+                type="number"
+                min="1"
+                value={entry.amount}
+                onChange={(e) =>
+                  updateAmount(
+                    entry.id,
+                    e.target.value === "" ? "" : Number(e.target.value),
+                  )
+                }
+                placeholder="Amount (e.g. 1, 2)..."
+                className="w-full px-3 py-2 rounded-xl text-sm outline-none transition-all"
+                style={{
+                  background: "#fff",
+                  border: "1.5px solid #E8D5F5",
+                  color: "#2B1F3A",
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.borderColor = "#8E5C9F";
+                  e.currentTarget.style.boxShadow =
+                    "0 0 0 3px rgba(142,92,159,0.12)";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.borderColor = "#E8D5F5";
+                  e.currentTarget.style.boxShadow = "none";
+                }}
+              />
+
+              {/* Time of day checkboxes */}
+              <div>
+                <p
+                  className="text-xs font-semibold mb-1.5"
+                  style={{ color: "#7A7386" }}
+                >
+                  Time of Day
+                </p>
+                <div className="flex gap-3 flex-wrap">
+                  {timeOptions.map((time) => {
+                    const checked = entry.times.includes(time);
+                    return (
+                      <div key={time} className="flex flex-col gap-1">
+                        <label
+                          data-ocid={`medicine.checkbox.${idx + 1}`}
+                          className="flex items-center gap-1.5 cursor-pointer select-none"
+                        >
+                          <input
+                            type="checkbox"
+                            className="sr-only"
+                            checked={checked}
+                            onChange={() => toggleTime(entry.id, time)}
+                            aria-label={time}
+                          />
+                          <span
+                            className="w-4.5 h-4.5 rounded flex items-center justify-center transition-all"
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              background: checked ? "#8E5C9F" : "#fff",
+                              border: checked ? "none" : "1.5px solid #CDB9E9",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {checked && (
+                              <svg
+                                width="10"
+                                height="8"
+                                viewBox="0 0 10 8"
+                                fill="none"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M1 4l3 3 5-6"
+                                  stroke="#fff"
+                                  strokeWidth="1.8"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            )}
+                          </span>
+                          <span
+                            className="text-xs font-medium"
+                            style={{ color: checked ? "#8E5C9F" : "#7A7386" }}
+                          >
+                            {time}
+                          </span>
+                        </label>
+                        {checked && (
+                          <input
+                            type="time"
+                            value={entry.timeInputs[time] || ""}
+                            onChange={(e) =>
+                              updateTimeInput(entry.id, time, e.target.value)
+                            }
+                            className="px-2 py-1 rounded-lg text-xs outline-none transition-all"
+                            style={{
+                              background: "#fff",
+                              border: "1.5px solid #CDB9E9",
+                              color: "#2B1F3A",
+                              width: "90px",
+                            }}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* When to take radio */}
+              <div>
+                <p
+                  className="text-xs font-semibold mb-1.5"
+                  style={{ color: "#7A7386" }}
+                >
+                  When to Take
+                </p>
+                <div className="flex gap-4">
+                  {(["before", "after"] as const).map((option) => {
+                    const selected = entry.whenToTake === option;
+                    return (
+                      <label
+                        key={option}
+                        data-ocid={`medicine.radio.${idx + 1}`}
+                        className="flex items-center gap-1.5 cursor-pointer select-none"
+                      >
+                        <input
+                          type="radio"
+                          className="sr-only"
+                          checked={selected}
+                          onChange={() => setWhen(entry.id, option)}
+                          name={`whenToTake-${entry.id}`}
+                          aria-label={`${option} food`}
+                        />
+                        <span
+                          className="rounded-full flex items-center justify-center transition-all"
+                          style={{
+                            width: "18px",
+                            height: "18px",
+                            border: selected ? "none" : "1.5px solid #CDB9E9",
+                            background: selected ? "#8E5C9F" : "#fff",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {selected && (
+                            <span
+                              className="rounded-full bg-white"
+                              style={{ width: "7px", height: "7px" }}
+                            />
+                          )}
+                        </span>
+                        <span
+                          className="text-xs font-medium capitalize"
+                          style={{ color: selected ? "#8E5C9F" : "#7A7386" }}
+                        >
+                          {option} Food
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex justify-end mt-1">
+                <button
+                  type="button"
+                  data-ocid={`medicine.save_button.${idx + 1}`}
+                  onClick={() => markDone(entry.id)}
+                  className="text-xs font-semibold px-3 py-1 rounded-full"
+                  style={{ background: "#8E5C9F", color: "#fff" }}
+                >
+                  Done ✓
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Add medicine button */}
+      <div className="mt-4 flex flex-col gap-2">
+        <button
+          type="button"
+          data-ocid="medicine.primary_button"
+          onClick={addEntry}
+          className="w-full py-2 rounded-xl text-xs font-bold tracking-wide transition-all flex items-center justify-center gap-1.5"
+          style={{
+            background: "#F0E8FA",
+            color: "#8E5C9F",
+            border: "1.5px solid #CDB9E9",
+          }}
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M7 2v10M2 7h10"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+          Add Another Medicine
+        </button>
+        {onSave && (
+          <button
+            type="button"
+            data-ocid="medicine.save_button"
+            onClick={() => {
+              onSaveWithCount ? onSaveWithCount(entries) : onSave?.();
+            }}
+            className="w-full py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all flex items-center justify-center gap-1.5"
+            style={{
+              background: "linear-gradient(135deg, #8E5C9F, #CDB9E9)",
+              color: "#fff",
+              boxShadow: "0 4px 12px rgba(142,92,159,0.25)",
+            }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M2 7l3.5 3.5L12 3"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            Save Reminders
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MedicineReminderModule() {
+  const [enabled, setEnabled] = useState(true);
+  const [saved, setSaved] = useState(false);
+  const [savedEntries, setSavedEntries] = useState<MedicineEntry[]>([]);
+
+  const handleSave = (entries: MedicineEntry[]) => {
+    setSavedEntries(entries);
+    setSaved(true);
+    // Immediately check if any medicine is low stock
+    for (const entry of entries) {
+      if (
+        typeof entry.amount === "number" &&
+        entry.amount > 0 &&
+        entry.amount < 10
+      ) {
+        emitNotif({
+          type: "warning",
+          message: `"${entry.name || "Medicine"}" is less than 10. Please Restock the medicine at your nearby Shop.`,
+        });
+      }
+    }
+  };
+
+  useEffect(() => {
+    for (const entry of savedEntries) {
+      if (
+        typeof entry.amount === "number" &&
+        entry.amount > 0 &&
+        entry.amount < 10
+      ) {
+        emitNotif({
+          type: "warning",
+          message: `"${entry.name || "Medicine"}" is less than 10. Please Restock the medicine at your nearby Shop.`,
+        });
+      }
+    }
+  }, [savedEntries]);
+
+  return (
+    <div id="medicine-reminder" className="mb-6">
+      <h2 className="text-lg font-semibold mb-4" style={{ color: "#2B1F3A" }}>
+        Medicine Reminder
+      </h2>
+      <div
+        className="bg-white overflow-hidden"
+        style={{
+          borderRadius: "16px",
+          boxShadow: "0 10px 25px rgba(142,92,159,0.1)",
+        }}
+      >
+        {/* Toggle row */}
+        <div className="p-4 flex items-center gap-3">
+          <div
+            className="w-11 h-11 rounded-xl flex items-center justify-center"
+            style={{ background: "#F0E8FA" }}
+          >
+            <PillIcon />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-sm" style={{ color: "#2B1F3A" }}>
+              Medicine Reminder
+            </p>
+            <p className="text-xs" style={{ color: "#7A7386" }}>
+              Track &amp; schedule your medicines
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span
+              className="text-xs font-semibold"
+              style={{ color: enabled ? "#8E5C9F" : "#CDB9E9" }}
+            >
+              {enabled ? "ON" : "OFF"}
+            </span>
+            <button
+              type="button"
+              data-ocid="medicine_reminder.toggle"
+              onClick={() => {
+                setEnabled((v) => !v);
+                setSaved(false);
+              }}
+              className="relative w-12 h-6 rounded-full transition-all duration-300"
+              style={{ background: enabled ? "#8E5C9F" : "#E8D5F5" }}
+              aria-label="Toggle Medicine Reminder"
+            >
+              <span
+                className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all duration-300"
+                style={{
+                  left: enabled ? "calc(100% - 22px)" : "2px",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.15)",
+                }}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Expanded content */}
+        {enabled && !saved && (
+          <MedicineReminderPanelWithCount onSave={handleSave} />
+        )}
+
+        {/* Summary view after save - circular trackers */}
+        {enabled && saved && (
+          <div
+            className="px-4 pb-4 pt-3"
+            style={{ background: "#F8F2FF", borderTop: "1px solid #E8D5F5" }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span
+                className="text-xs font-bold uppercase tracking-wider"
+                style={{ color: "#8E5C9F" }}
+              >
+                Medicine Trackers
+              </span>
+              <button
+                type="button"
+                data-ocid="medicine_reminder.edit_button"
+                onClick={() => setSaved(false)}
+                className="px-3 py-1 rounded-lg text-xs font-semibold transition-all"
+                style={{
+                  background: "#F0E8FA",
+                  color: "#8E5C9F",
+                  border: "1.5px solid #CDB9E9",
+                }}
+              >
+                Edit
+              </button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center">
+              {savedEntries.map((med) => {
+                const _total =
+                  typeof med.amount === "number" && med.amount > 0
+                    ? med.amount
+                    : 1;
+                const r = 36;
+                const circ = 2 * Math.PI * r;
+                const dashFill = circ;
+                const timesLabel =
+                  med.times.length > 0 ? med.times.join(", ") : "—";
+                const whenLabel = med.whenToTake
+                  ? `${med.whenToTake} food`
+                  : "";
+                return (
+                  <div
+                    key={med.id}
+                    className="flex flex-col items-center gap-2"
+                    style={{ minWidth: "90px" }}
+                  >
+                    <div className="relative" style={{ width: 90, height: 90 }}>
+                      <svg
+                        width="90"
+                        height="90"
+                        viewBox="0 0 90 90"
+                        aria-hidden="true"
+                      >
+                        <circle
+                          cx="45"
+                          cy="45"
+                          r={r}
+                          fill="none"
+                          stroke="#E8D5F5"
+                          strokeWidth="8"
+                        />
+                        <circle
+                          cx="45"
+                          cy="45"
+                          r={r}
+                          fill="none"
+                          stroke="#8E5C9F"
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeDasharray={`${dashFill} ${circ}`}
+                          strokeDashoffset={circ * 0.25}
+                          style={{ transition: "stroke-dasharray 0.5s ease" }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-1">
+                        <span
+                          className="font-bold leading-tight"
+                          style={{
+                            color: "#2B1F3A",
+                            fontSize:
+                              med.name.length > 8
+                                ? "8px"
+                                : med.name.length > 5
+                                  ? "9px"
+                                  : "11px",
+                            maxWidth: "64px",
+                            wordBreak: "break-word",
+                            lineHeight: "1.2",
+                          }}
+                        >
+                          {med.name || "Medicine"}
+                        </span>
+                        {typeof med.amount === "number" && med.amount > 0 && (
+                          <span
+                            className="text-xs font-semibold"
+                            style={{ color: "#8E5C9F", marginTop: "2px" }}
+                          >
+                            ×{med.amount}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <p
+                        className="text-xs font-medium"
+                        style={{ color: "#8E5C9F" }}
+                      >
+                        {timesLabel}
+                      </p>
+                      {whenLabel && (
+                        <p className="text-xs" style={{ color: "#7A7386" }}>
+                          {whenLabel}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p
+              className="text-xs text-center mt-3"
+              style={{ color: "#7A7386" }}
+            >
+              {savedEntries.length} medicine
+              {savedEntries.length !== 1 ? "s" : ""} scheduled · Tap Edit to
+              update
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MedicineReminderPanelWithCount({
+  onSave,
+}: { onSave: (entries: MedicineEntry[]) => void }) {
+  return <MedicineReminderPanel onSaveWithCount={onSave} />;
+}
+
+function EmergencySOS({
+  emergencyContact,
+}: { emergencyContact: { name: string; phone: string } | null }) {
+  return (
+    <div
+      className="rounded-2xl p-5 mb-6"
+      style={{ background: "linear-gradient(135deg, #8E5C9F, #C0392B)" }}
+    >
+      <div className="flex flex-col items-center text-center gap-3">
+        <WarningIcon />
+        <div>
+          <h2 className="text-xl font-bold text-white">Emergency Assistance</h2>
+          <p
+            className="text-sm mt-1"
+            style={{ color: "rgba(255,255,255,0.8)" }}
+          >
+            Call ambulance and notify emergency contacts
+          </p>
+        </div>
+        <button
+          type="button"
+          data-ocid="emergency.primary_button"
+          onClick={() => {
+            window.location.href = "tel:+917538835169";
+          }}
+          className="px-8 py-3 rounded-full font-bold text-white text-lg mt-1 animate-pulse-red cursor-pointer transition-transform hover:scale-105"
+          style={{ background: "#E0524D" }}
+        >
+          Call Now
+        </button>
+        {emergencyContact?.name && (
+          <button
+            type="button"
+            data-ocid="emergency.secondary_button"
+            onClick={() => {
+              window.location.href = `tel:${emergencyContact.phone}`;
+            }}
+            className="px-6 py-2 rounded-full font-semibold text-white text-sm cursor-pointer transition-transform hover:scale-105"
+            style={{
+              background: "rgba(255,255,255,0.2)",
+              border: "1px solid rgba(255,255,255,0.4)",
+            }}
+          >
+            Call {emergencyContact.name}
+          </button>
+        )}
+        <p className="text-xs" style={{ color: "rgba(255,255,255,0.6)" }}>
+          Or call 108 directly
+        </p>
+      </div>
+    </div>
+  );
+}
+
+const INITIAL_MESSAGES: Message[] = [
+  {
+    id: 1,
+    role: "ai",
+    text: "Hello! I'm Tina, your Mothera Pregnancy Assistant 💜 I'm here to support you through every step of your pregnancy. Ask me about symptoms, nutrition, sleep, exercises, or anything on your mind!",
+    timestamp: new Date(),
+  },
+];
+
+function getAIResponse(input: string): string {
+  const msg = input.toLowerCase();
+  if (msg.includes("back pain") || msg.includes("backache"))
+    return "Back pain is very common in pregnancy, especially after week 20. Try: sleeping on your left side with a pillow between knees, gentle cat-cow stretches, prenatal yoga, and warm compresses. Avoid lying flat on your back. If pain is severe or sharp, consult your doctor.";
+  if (
+    msg.includes("nausea") ||
+    msg.includes("morning sickness") ||
+    msg.includes("vomit")
+  )
+    return "Morning sickness usually peaks around week 8-10 and eases by week 14. Tips: eat small meals every 2-3 hours, keep plain crackers by your bed, try ginger tea or ginger chews, stay hydrated with sips of cold water, and avoid strong smells. If you can't keep food down for 24+ hours, call your doctor.";
+  if (
+    msg.includes("kick") ||
+    msg.includes("movement") ||
+    msg.includes("baby moving")
+  )
+    return "You'll typically feel baby movements (quickening) between weeks 16-25. By week 28, count fetal kicks — you should feel at least 10 movements in 2 hours. Movements may feel like flutters, rolls, or jabs. If you notice a significant decrease in movement, contact your doctor right away.";
+  if (
+    msg.includes("food") ||
+    msg.includes("eat") ||
+    msg.includes("diet") ||
+    msg.includes("nutrition")
+  )
+    return "Focus on: 🥦 Leafy greens for folate & iron, 🐟 Fatty fish (salmon, sardines) twice a week for DHA, 🥚 Eggs for protein & choline, 🫘 Legumes for fiber & folate, 🥛 Dairy for calcium, 🌾 Whole grains for energy. Avoid: raw fish, unpasteurized cheese, deli meats, and excess caffeine (max 200mg/day).";
+  if (
+    msg.includes("sleep") ||
+    msg.includes("insomnia") ||
+    msg.includes("tired")
+  )
+    return "Sleep challenges are normal in pregnancy. Tips: sleep on your left side to improve circulation, use a pregnancy pillow (U-shaped works great), keep a cool room (65-68°F), avoid screens 1 hour before bed, try a warm bath before sleeping, and limit fluids 2 hours before bedtime to reduce night trips.";
+  if (
+    msg.includes("exercise") ||
+    msg.includes("yoga") ||
+    msg.includes("workout") ||
+    msg.includes("swim")
+  )
+    return "Exercise is safe and beneficial during pregnancy! Recommended: walking (30 min/day), prenatal yoga, swimming, light strength training. Avoid: contact sports, hot yoga, exercises lying flat on back after week 16, heavy lifting. Always warm up, stay hydrated, and stop if you feel dizzy, short of breath, or have pain.";
+  if (
+    msg.includes("swollen") ||
+    msg.includes("swelling") ||
+    msg.includes("feet") ||
+    msg.includes("ankles")
+  )
+    return "Mild swelling (edema) in feet and ankles is normal, especially in the third trimester. Help: elevate feet when resting, stay hydrated, avoid standing for long periods, wear comfortable shoes, sleep on your left side. ⚠️ See your doctor immediately if swelling is sudden, severe, or in your face/hands — this can be a sign of preeclampsia.";
+  if (
+    msg.includes("heartburn") ||
+    msg.includes("acid") ||
+    msg.includes("indigestion")
+  )
+    return "Heartburn is very common as your uterus grows and pushes on your stomach. Try: eating small meals, avoiding spicy/fatty foods, not lying down within 2-3 hours of eating, sleeping with head elevated, and antacids (Tums) which are safe in pregnancy. Talk to your doctor if it's severe.";
+  if (
+    msg.includes("vitamin") ||
+    msg.includes("supplement") ||
+    msg.includes("folic")
+  )
+    return "Essential supplements during pregnancy: ✅ Folic acid (400-800mcg) — prevents neural tube defects, ✅ Iron (27mg) — supports blood production, ✅ Calcium (1000mg) — for baby's bones, ✅ Vitamin D (600 IU) — absorbed with calcium, ✅ DHA/Omega-3 — for brain development, ✅ Prenatal multivitamin. Always take with your doctor's guidance.";
+  if (
+    msg.includes("contraction") ||
+    msg.includes("labor") ||
+    msg.includes("birth")
+  )
+    return "Know the 5-1-1 rule for true labor: contractions every 5 minutes, lasting 1 minute each, for at least 1 hour. Before that, you may have Braxton Hicks (practice) contractions — they're irregular and ease with movement. Also watch for: water breaking, bloody show, or strong pelvic pressure. Have your hospital bag ready after week 36!";
+  if (
+    msg.includes("stress") ||
+    msg.includes("anxiety") ||
+    msg.includes("worried") ||
+    msg.includes("nervous")
+  )
+    return "It's completely normal to feel anxious during pregnancy. Some helpful strategies: deep breathing (4-7-8 technique), prenatal meditation apps, talking to a therapist, joining pregnancy support groups, journaling your feelings, and sharing concerns with your partner. Chronic stress can affect baby — please reach out to your doctor if anxiety feels overwhelming.";
+  if (msg.includes("week") || msg.includes("trimester"))
+    return "Pregnancy is divided into 3 trimesters: 🌱 First (weeks 1-12): Baby's organs form, morning sickness peaks. 🌿 Second (weeks 13-26): Energy returns, baby bump shows, feel movements. 🌸 Third (weeks 27-40): Baby grows rapidly, prepare for birth. Each trimester has different challenges and milestones!";
+  if (
+    msg.includes("doctor") ||
+    msg.includes("checkup") ||
+    msg.includes("appointment") ||
+    msg.includes("visit")
+  )
+    return "Standard prenatal visit schedule: Weeks 4-28 → monthly visits, Weeks 28-36 → every 2 weeks, Weeks 36-40 → weekly visits. Key tests: first trimester screening (10-13 weeks), anatomy scan (18-20 weeks), glucose test (24-28 weeks), Group B strep (35-37 weeks). Never miss appointments — they're crucial for you and baby's health!";
+  if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey"))
+    return "Hello! 👋 I'm Tina, your Mothera Pregnancy Assistant. I'm here to support you through your pregnancy journey. You can ask me about symptoms, nutrition, exercises, what to expect each trimester, or anything else on your mind. How are you feeling today?";
+  if (msg.includes("thank") || msg.includes("thanks"))
+    return "You're so welcome! 💜 Remember, you're doing an amazing job. Growing a human is hard work! I'm always here whenever you have questions or just need reassurance. Take care of yourself! 🌸";
+  if (msg.includes("sleep tip") || msg.includes("sleep tips"))
+    return "For better pregnancy sleep: 😴 Use a U-shaped pregnancy pillow, 🌡️ Keep room cool (65-68°F), 📵 No screens 1hr before bed, 🛁 Warm bath before sleeping, 💧 Limit fluids 2hrs before bed, 🧘 Try relaxation breathing. Left-side sleeping improves blood flow to baby!";
+  const defaults = [
+    "That's a great question! Could you tell me more about what you're experiencing? I want to give you the most helpful advice possible. 💜",
+    "Every pregnancy is unique, and it's wonderful that you're being so attentive to your health. For specific medical concerns, always consult your OB or midwife — but I'm here to offer general guidance and support!",
+    "I'm here to help! While I can offer general pregnancy guidance, remember that your healthcare provider knows your specific situation best. Is there something particular you'd like to know more about?",
+  ];
+  return defaults[Math.floor(Math.random() * defaults.length)];
+}
+
+const QUICK_REPLIES = [
+  { label: "😴 Sleep tips", message: "Give me sleep tips for pregnancy" },
+  {
+    label: "🥗 What to eat",
+    message: "What foods should I eat during pregnancy",
+  },
+  {
+    label: "🏃 Safe exercises",
+    message: "What exercises are safe during pregnancy",
+  },
+  {
+    label: "🤢 Nausea relief",
+    message: "How to relieve nausea and morning sickness",
+  },
+];
+
+const LOGO_SRC =
+  "/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg";
+
+function AIChat({ onClose }: { onClose?: () => void }) {
+  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [inputValue, setInputValue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [hasSentMessage, setHasSentMessage] = useState(false);
+  const nextIdRef = useRef(INITIAL_MESSAGES.length + 1);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const recognitionRef = useRef<any>(null);
+
+  const handleSend = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isTyping) return;
+    const userMsg: Message = {
+      id: nextIdRef.current,
+      role: "user",
+      text: trimmed,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    nextIdRef.current += 1;
+    setInputValue("");
+    setHasSentMessage(true);
+    setIsTyping(true);
+    setTimeout(() => {
+      const aiMsg: Message = {
+        id: nextIdRef.current,
+        role: "ai",
+        text: getAIResponse(trimmed),
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+      nextIdRef.current += 1;
+      setIsTyping(false);
+      if (voiceEnabled && "speechSynthesis" in window) {
+        const utter = new SpeechSynthesisUtterance(aiMsg.text);
+        utter.lang = "en-US";
+        utter.rate = 0.9;
+        utter.pitch = 1.1;
+        const voices = window.speechSynthesis.getVoices();
+        const femaleVoice = voices.find(
+          (v) => v.lang.startsWith("en") && /female/i.test(v.name),
+        );
+        if (femaleVoice) utter.voice = femaleVoice;
+        utter.onstart = () => setIsSpeaking(true);
+        utter.onend = () => setIsSpeaking(false);
+        window.speechSynthesis.speak(utter);
+      }
+    }, 1200);
+  };
+
+  const startListening = () => {
+    const SpeechRecognitionCtor =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) return;
+    const recognition = new SpeechRecognitionCtor();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (e: any) => {
+      const transcript = e.results[0][0].transcript;
+      setIsListening(false);
+      handleSend(transcript);
+    };
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
+  const hasSpeechSupport =
+    typeof window !== "undefined" &&
+    !!(
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition
+    );
+
+  const sendMessage = () => handleSend(inputValue);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scrollRef is stable
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, isTyping]);
+
+  return (
+    <div className="bg-white flex flex-col h-full">
+      {/* Header */}
+      <div
+        className="flex items-center gap-3 px-4 py-3"
+        style={{
+          background: "linear-gradient(135deg, #8E5C9F 0%, #B07CC6 100%)",
+        }}
+      >
+        <div className="relative flex-shrink-0">
+          <img
+            src={LOGO_SRC}
+            alt="Mothera AI"
+            className="w-10 h-10 rounded-full object-cover border-2 border-white/40"
+          />
+          <span
+            className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
+            style={{ background: "#22C55E" }}
+          />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h2 className="text-white font-bold text-base leading-tight">
+              Tina
+            </h2>
+          </div>
+          <p className="text-white/75 text-xs">
+            Mothera Pregnancy Assistant · Online
+          </p>
+        </div>
+        <button
+          type="button"
+          data-ocid="chat.toggle"
+          onClick={() => {
+            setVoiceEnabled((v) => !v);
+            if (isSpeaking) window.speechSynthesis.cancel();
+          }}
+          className="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/20 cursor-pointer"
+          aria-label={voiceEnabled ? "Mute voice" : "Unmute voice"}
+          title={voiceEnabled ? "Mute Tina's voice" : "Enable Tina's voice"}
+        >
+          {voiceEnabled ? (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={isSpeaking ? "#FFD700" : "white"}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+              className={isSpeaking ? "animate-pulse" : ""}
+            >
+              <title>Speaker on</title>
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+            </svg>
+          ) : (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+              style={{ opacity: 0.5 }}
+            >
+              <title>Speaker off</title>
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              <line x1="23" y1="9" x2="17" y2="15" />
+              <line x1="17" y1="9" x2="23" y2="15" />
+            </svg>
+          )}
+        </button>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            data-ocid="chat.close_button"
+            className="w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-white/20 cursor-pointer"
+            aria-label="Close chat"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <title>Close</title>
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Messages */}
+      <div
+        ref={scrollRef}
+        className="flex flex-col gap-3 overflow-y-auto px-4 py-4 flex-1"
+        data-ocid="chat.panel"
+      >
+        {messages.map((msg) => (
+          <div
+            key={msg.id}
+            className={`flex animate-message-appear items-end gap-2 ${
+              msg.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            {msg.role === "ai" && (
+              <img
+                src={LOGO_SRC}
+                alt="Mothera AI"
+                className="w-7 h-7 rounded-full object-cover flex-shrink-0 mb-1"
+              />
+            )}
+            <div
+              className={`flex flex-col gap-1 ${msg.role === "user" ? "items-end" : "items-start"}`}
+            >
+              <div
+                className="max-w-xs px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
+                style={
+                  msg.role === "user"
+                    ? {
+                        background: "linear-gradient(135deg, #8E5C9F, #B07CC6)",
+                        color: "white",
+                        borderBottomRightRadius: "4px",
+                      }
+                    : {
+                        background: "#F0E8FA",
+                        color: "#2B1F3A",
+                        borderBottomLeftRadius: "4px",
+                      }
+                }
+              >
+                {msg.text}
+              </div>
+              <span className="text-xs px-1" style={{ color: "#B0A8B9" }}>
+                {msg.timestamp.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+          </div>
+        ))}
+
+        {/* Typing indicator */}
+        {isTyping && (
+          <div className="flex items-end gap-2 animate-message-appear">
+            <img
+              src={LOGO_SRC}
+              alt="Mothera AI"
+              className="w-7 h-7 rounded-full object-cover flex-shrink-0 mb-1"
+            />
+            <div
+              className="px-4 py-3 rounded-2xl"
+              style={{ background: "#F0E8FA", borderBottomLeftRadius: "4px" }}
+            >
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+              <span className="typing-dot" />
+            </div>
+          </div>
+        )}
+
+        {/* Quick reply chips */}
+        {!hasSentMessage && (
+          <div className="flex flex-wrap gap-2 mt-1">
+            {QUICK_REPLIES.map((qr) => (
+              <button
+                key={qr.label}
+                type="button"
+                data-ocid="chat.button"
+                onClick={() => handleSend(qr.message)}
+                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 hover:scale-105 cursor-pointer"
+                style={{
+                  background: "#F0E8FA",
+                  color: "#8E5C9F",
+                  border: "1.5px solid #D4B8ED",
+                }}
+              >
+                {qr.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Input */}
+      <div className="flex gap-2 px-4 pb-4">
+        <input
+          type="text"
+          data-ocid="chat.input"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Ask anything about your pregnancy..."
+          className="flex-1 px-4 py-2.5 rounded-full text-sm outline-none transition-all duration-200"
+          style={{
+            background: "#F8F4FB",
+            border: "1.5px solid #E8D5F5",
+            color: "#2B1F3A",
+          }}
+        />
+        {hasSpeechSupport && (
+          <button
+            type="button"
+            data-ocid="chat.button"
+            onClick={isListening ? stopListening : startListening}
+            disabled={isTyping}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 cursor-pointer disabled:opacity-60 ${isListening ? "animate-pulse" : ""}`}
+            style={{
+              background: isListening
+                ? "linear-gradient(135deg, #ef4444, #dc2626)"
+                : "linear-gradient(135deg, #C7A8E8, #8E5C9F)",
+            }}
+            aria-label={isListening ? "Stop listening" : "Start voice input"}
+          >
+            {isListening ? (
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="white"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <title>Stop</title>
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
+            ) : (
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <title>Microphone</title>
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="8" y1="23" x2="16" y2="23" />
+              </svg>
+            )}
+          </button>
+        )}
+        <button
+          type="button"
+          data-ocid="chat.submit_button"
+          onClick={sendMessage}
+          disabled={isTyping}
+          className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 cursor-pointer disabled:opacity-60"
+          style={{ background: "linear-gradient(135deg, #8E5C9F, #B07CC6)" }}
+        >
+          <SendIcon />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function VideoCard({
+  video,
+  category,
+}: { video: { id: string; title: string }; category: string }) {
+  const [playing, setPlaying] = useState(false);
+  const [unavailable, setUnavailable] = useState(false);
+
+  if (unavailable) {
+    return (
+      <div
+        style={{
+          width: "280px",
+          flexShrink: 0,
+          background: "#F3EAF9",
+          borderRadius: "14px",
+          overflow: "hidden",
+          boxShadow: "0 4px 12px rgba(142,92,159,0.12)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "190px",
+          gap: "8px",
+          padding: "16px",
+        }}
+      >
+        <p
+          className="text-xs text-center"
+          style={{ color: "#8E5C9F", fontWeight: 600 }}
+        >
+          Video unavailable
+        </p>
+        <p className="text-xs text-center" style={{ color: "#6B7280" }}>
+          {video.title}
+        </p>
+        <a
+          href={`https://www.youtube.com/results?search_query=pregnancy+${encodeURIComponent(category.toLowerCase())}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs font-semibold underline"
+          style={{ color: "#8E5C9F" }}
+        >
+          Search on YouTube →
+        </a>
+      </div>
+    );
+  }
+
+  if (playing) {
+    return (
+      <div
+        style={{
+          width: "280px",
+          flexShrink: 0,
+          background: "#000",
+          borderRadius: "14px",
+          overflow: "hidden",
+          boxShadow: "0 4px 12px rgba(142,92,159,0.12)",
+        }}
+      >
+        <iframe
+          width="280"
+          height="158"
+          src={`https://www.youtube.com/embed/${video.id}?autoplay=1`}
+          title={video.title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          style={{ display: "block", border: "none" }}
+        />
+        <p
+          className="text-xs font-semibold px-3 py-2"
+          style={{ color: "#2B1F3A" }}
+        >
+          {video.title}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      style={{
+        width: "280px",
+        flexShrink: 0,
+        background: "#fff",
+        borderRadius: "14px",
+        overflow: "hidden",
+        boxShadow: "0 4px 12px rgba(142,92,159,0.12)",
+        cursor: "pointer",
+        padding: 0,
+        border: "none",
+        textAlign: "left",
+      }}
+      onClick={() => setPlaying(true)}
+    >
+      <div style={{ position: "relative", width: "280px", height: "158px" }}>
+        <img
+          src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`}
+          alt={video.title}
+          width={280}
+          height={158}
+          style={{
+            width: "280px",
+            height: "158px",
+            objectFit: "cover",
+            display: "block",
+          }}
+          onError={() => setUnavailable(true)}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(0,0,0,0.15)",
+          }}
+        >
+          <div
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              background: "rgba(255,0,0,0.85)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            }}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="white"
+              aria-label="Play video"
+            >
+              <title>Play video</title>
+              <polygon points="5,3 19,12 5,21" />
+            </svg>
+          </div>
+        </div>
+      </div>
+      <p
+        className="text-xs font-semibold px-3 py-2"
+        style={{ color: "#2B1F3A" }}
+      >
+        {video.title}
+      </p>
+    </button>
+  );
+}
+
+function HealthWellness() {
+  const [activeCategory, setActiveCategory] = useState("Exercise");
+
+  const items = [
+    {
+      label: "Exercise",
+      image: "/assets/generated/pregnant-exercise.dim_600x400.jpg",
+      gradient: "linear-gradient(135deg, #E8D5F5, #C8E6F9)",
+      videos: [
+        { id: "Lk6c0ZgRXes", title: "Prenatal Full Body Workout" },
+        { id: "UozlmMkD2OA", title: "Safe Pregnancy Exercises" },
+        { id: "7kgZnJqzHOM", title: "1st Trimester Workout" },
+        { id: "4hRPdMjYp7A", title: "Prenatal Cardio" },
+        { id: "nGFZzCyBwJ4", title: "Pregnancy Fitness Routine" },
+      ],
+    },
+    {
+      label: "Yoga",
+      image: "/assets/generated/pregnant-yoga.dim_600x400.jpg",
+      gradient: "linear-gradient(135deg, #F9C6D0, #E8D5F5)",
+      videos: [
+        { id: "CLR9e-R-4ko", title: "Yoga for Pregnant Women" },
+        { id: "v7AYKMP6rOE", title: "Gentle Pregnancy Yoga" },
+        { id: "4pKly2JojMw", title: "Morning Prenatal Yoga" },
+        { id: "YZD0g0HuIxI", title: "Third Trimester Yoga" },
+        { id: "eMKr9RFNiow", title: "Prenatal Yoga Flow" },
+      ],
+    },
+    {
+      label: "Meditation",
+      image: "/assets/generated/pregnant-meditation.dim_600x400.jpg",
+      gradient: "linear-gradient(135deg, #FDDCB5, #F9C6D0)",
+      videos: [
+        { id: "inpok4MKVLM", title: "Mindfulness Meditation" },
+        { id: "86m4RC_ADEY", title: "Deep Relaxation" },
+        { id: "O-6f5wQXSu8", title: "Breathing Meditation" },
+        { id: "ZToicYcHIOU", title: "Prenatal Relaxation" },
+        { id: "ENYYb5vIMkU", title: "Guided Pregnancy Meditation" },
+      ],
+    },
+  ];
+
+  const activeItem = items.find((item) => item.label === activeCategory)!;
+
+  return (
+    <div id="wellness" className="mb-6">
+      <h2 className="text-lg font-semibold mb-4" style={{ color: "#2B1F3A" }}>
+        Health &amp; Wellness
+      </h2>
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        {items.map((item, i) => {
+          const isActive = activeCategory === item.label;
+          return (
+            <button
+              key={item.label}
+              type="button"
+              data-ocid={`wellness.item.${i + 1}`}
+              className="rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer card-hover w-full"
+              onClick={() => setActiveCategory(item.label)}
+              style={{
+                background: item.gradient,
+                height: "150px",
+                padding: "0",
+                overflow: "hidden",
+                border: isActive
+                  ? "2px solid #8E5C9F"
+                  : "2px solid transparent",
+                boxShadow: isActive
+                  ? "0 0 0 2px #8E5C9F, 0 6px 15px rgba(142,92,159,0.2)"
+                  : "0 6px 15px rgba(142,92,159,0.1)",
+              }}
+            >
+              <img
+                src={item.image}
+                alt={item.label}
+                className="w-full object-cover rounded-t-2xl"
+                style={{ height: "90px" }}
+              />
+              <p
+                className="text-sm font-semibold text-center px-2 pb-1"
+                style={{ color: isActive ? "#8E5C9F" : "#2B1F3A" }}
+              >
+                {item.label}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        style={{
+          overflowX: "auto",
+          scrollbarWidth: "thin",
+          scrollbarColor: "#C8A8D8 #F3EAF9",
+          paddingBottom: "8px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: "12px",
+            width: "max-content",
+          }}
+        >
+          {activeItem.videos.map((video) => (
+            <VideoCard key={video.id} video={video} category={activeCategory} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NearbyHelp() {
+  const [mapOpen, setMapOpen] = useState(false);
+
+  const address =
+    "2/830, Krishna Nagar, Veerapandi, Tirupur-641604, Tamil Nadu, India";
+  const previewMapUrl =
+    "https://maps.google.com/maps?q=hospital+clinic+medical+pharmacy+nursing+home+near+Veerapandi,Tirupur,Tamil+Nadu,India&output=embed&z=12";
+  const fullMapUrl =
+    "https://maps.google.com/maps?q=hospital+clinic+medical+pharmacy+nursing+home+near+Veerapandi,Tirupur,Tamil+Nadu,India&output=embed&z=11";
+
+  return (
+    <div className="mb-6">
+      <h2 className="text-lg font-semibold mb-4" style={{ color: "#2B1F3A" }}>
+        Nearby Help
+      </h2>
+
+      {/* Preview Card - clickable */}
+      <div
+        className="relative rounded-2xl overflow-hidden"
+        style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
+      >
+        {/* Map preview iframe */}
+        <div style={{ height: "220px", pointerEvents: "none" }}>
+          <iframe
+            title="Nearby Help Map Preview"
+            src={previewMapUrl}
+            width="100%"
+            height="220"
+            style={{ border: 0 }}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+
+        {/* Overlay bar with address */}
+        <div
+          className="absolute bottom-0 left-0 right-0 p-4 flex justify-between items-center"
+          style={{
+            background: "rgba(255,255,255,0.95)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div>
+            <p className="text-sm font-semibold" style={{ color: "#2B1F3A" }}>
+              📍 {address}
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: "#7A7386" }}>
+              Nearby hospitals &amp; medical shops
+            </p>
+          </div>
+          <button
+            type="button"
+            data-ocid="nearby.primary_button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMapOpen(true);
+            }}
+            className="px-4 py-2 rounded-full text-sm font-medium text-white cursor-pointer transition-all duration-200 hover:opacity-90 whitespace-nowrap ml-3"
+            style={{ background: "linear-gradient(135deg, #8E5C9F, #B07CC6)" }}
+          >
+            View Full Map
+          </button>
+        </div>
+      </div>
+
+      {/* Full-screen Map Modal */}
+      {mapOpen && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col"
+          style={{ background: "rgba(0,0,0,0.85)" }}
+        >
+          {/* Header */}
+          <div
+            className="flex items-center justify-between px-5 py-4"
+            style={{ background: "#fff" }}
+          >
+            <div>
+              <p
+                className="text-base font-semibold"
+                style={{ color: "#2B1F3A" }}
+              >
+                Nearby Hospitals &amp; Medical Shops
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "#7A7386" }}>
+                📍 {address}
+              </p>
+            </div>
+            <button
+              type="button"
+              data-ocid="nearby.close_button"
+              onClick={() => setMapOpen(false)}
+              className="w-9 h-9 flex items-center justify-center rounded-full text-white text-lg font-bold cursor-pointer"
+              style={{
+                background: "linear-gradient(135deg, #8E5C9F, #B07CC6)",
+              }}
+              aria-label="Close map"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Full map */}
+          <div className="flex-1 relative">
+            <iframe
+              title="Nearby Help Full Map"
+              src={fullMapUrl}
+              width="100%"
+              height="100%"
+              style={{ border: 0, display: "block", height: "100%" }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+
+          {/* Footer hint */}
+          <div
+            className="px-5 py-3 text-center text-xs"
+            style={{ background: "#fff", color: "#7A7386" }}
+          >
+            Tap any location on the map for directions
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DoctorConnect({
+  userDoctorName,
+  userPhone,
+}: { userDoctorName: string; userPhone: string }) {
+  const [selected, setSelected] = useState<number | null>(null);
+
+  const baseDoctors = [
+    {
+      name: "Dr. Priya Sharma",
+      specialty: "OB-GYN",
+      phone: "+917538835169",
+      displayPhone: "+91 98765 43210",
+      gradient: "linear-gradient(135deg, #8E5C9F, #C8A6E0)",
+      accent: "#8E5C9F",
+    },
+    {
+      name: "Dr. Anita Verma",
+      specialty: "Nutritionist",
+      phone: "+918765432109",
+      displayPhone: "+91 87654 32109",
+      gradient: "linear-gradient(135deg, #F9C6D0, #FDDCB5)",
+      accent: "#E07898",
+    },
+    {
+      name: "Dr. Raj Kumar",
+      specialty: "Physiotherapist",
+      phone: "+917654321098",
+      displayPhone: "+91 76543 21098",
+      gradient: "linear-gradient(135deg, #C8E6F9, #E8D5F5)",
+      accent: "#7AAFE0",
+    },
+  ];
+
+  const doctors = userDoctorName
+    ? [
+        {
+          name: userDoctorName,
+          specialty: "Your Doctor",
+          phone: userPhone || "",
+          displayPhone: userPhone || "—",
+          gradient: "linear-gradient(135deg, #6B21A8, #9333EA)",
+          accent: "#9333EA",
+        },
+        ...baseDoctors,
+      ]
+    : baseDoctors;
+
+  const selectedDoc = selected !== null ? doctors[selected] : null;
+
+  return (
+    <div id="connect" className="mb-6">
+      <h2 className="text-lg font-semibold mb-4" style={{ color: "#2B1F3A" }}>
+        Doctor Connect
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {doctors.map((doc, i) => (
+          <button
+            key={doc.name}
+            type="button"
+            data-ocid={`doctors.item.${i + 1}`}
+            onClick={() => setSelected(i)}
+            className="bg-white rounded-2xl overflow-hidden cursor-pointer card-hover flex items-stretch w-full text-left"
+            style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
+          >
+            <div
+              className="w-2 rounded-l-2xl flex-shrink-0"
+              style={{ background: doc.gradient }}
+            />
+            <div className="p-4 flex flex-col gap-1 flex-1">
+              <p className="font-bold text-sm" style={{ color: "#2B1F3A" }}>
+                {doc.name}
+              </p>
+              <p className="text-xs" style={{ color: "#7A7386" }}>
+                {doc.specialty}
+              </p>
+              <div className="flex items-center gap-1 mt-1">
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={doc.accent}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-label="Phone"
+                  role="img"
+                >
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 11.23a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.8 .5h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 7.91a16 16 0 0 0 6.06 6.06l1.57-1.57a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: doc.accent }}
+                >
+                  {doc.displayPhone}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center pr-4">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#C8A6E0"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-label="Open"
+                role="img"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {selectedDoc && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{
+            background: "rgba(43,31,58,0.6)",
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={() => setSelected(null)}
+          onKeyDown={(e) => e.key === "Escape" && setSelected(null)}
+        >
+          <div
+            className="bg-white rounded-3xl p-6 mx-4 w-full max-w-sm relative"
+            style={{ boxShadow: "0 25px 60px rgba(142,92,159,0.3)" }}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              data-ocid="doctors.close_button"
+              onClick={() => setSelected(null)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+              style={{ color: "#7A7386" }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                aria-label="Close"
+                role="img"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <div
+              className="mb-1"
+              style={{
+                color: "#8E5C9F",
+                fontSize: "11px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              }}
+            >
+              Contact
+            </div>
+            <p
+              className="text-base font-bold mb-0.5"
+              style={{ color: "#2B1F3A" }}
+            >
+              {selectedDoc.name}
+            </p>
+            <p className="text-xs mb-5" style={{ color: "#7A7386" }}>
+              {selectedDoc.specialty}
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <a
+                data-ocid="doctors.primary_button"
+                href={`tel:${selectedDoc.phone}`}
+                className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all hover:scale-105 active:scale-95 no-underline"
+                style={{
+                  borderColor: selectedDoc.accent,
+                  background: `${selectedDoc.accent}10`,
+                }}
+              >
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: selectedDoc.accent }}
+                >
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-label="Call"
+                    role="img"
+                  >
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 11.23a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.8 .5h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 7.91a16 16 0 0 0 6.06 6.06l1.57-1.57a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+                  </svg>
+                </div>
+                <span
+                  className="font-semibold text-sm"
+                  style={{ color: selectedDoc.accent }}
+                >
+                  Call
+                </span>
+              </a>
+              <a
+                data-ocid="doctors.secondary_button"
+                href={`https://wa.me/${selectedDoc.phone.replace(/\+/g, "")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all hover:scale-105 active:scale-95 no-underline"
+                style={{ borderColor: "#25D366", background: "#25D36610" }}
+              >
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: "#25D366" }}
+                >
+                  <svg
+                    width="26"
+                    height="26"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-label="Video Call"
+                    role="img"
+                  >
+                    <polygon points="23 7 16 12 23 17 23 7" />
+                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                  </svg>
+                </div>
+                <span
+                  className="font-semibold text-sm"
+                  style={{ color: "#25D366" }}
+                >
+                  Video Call
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CheckUpReminder() {
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleDone = () => {
+    if (!date) {
+      setError("Please select a date.");
+      return;
+    }
+    setError("");
+    setDone(true);
+    const days = getRemainingDays();
+    if (days <= 0) {
+      const timeDisplay = time
+        ? new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+          })
+        : "Not specified";
+      emitNotif({
+        type: "urgent",
+        message: `Today is your Checkup. Time: ${timeDisplay}`,
+      });
+    }
+  };
+
+  const handleEdit = () => {
+    setDone(false);
+  };
+
+  // Re-check every minute while app is open on checkup day
+  useEffect(() => {
+    if (!done || !date) return;
+    const interval = setInterval(() => {
+      const days = getRemainingDays();
+      if (days <= 0) {
+        const timeDisplay = time
+          ? new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+            })
+          : "Not specified";
+        emitNotif({
+          type: "urgent",
+          message: `Today is your Checkup. Time: ${timeDisplay}`,
+        });
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [done, date, time]);
+
+  const getRemainingDays = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkup = new Date(date);
+    checkup.setHours(0, 0, 0, 0);
+    const diff = Math.ceil(
+      (checkup.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    return diff;
+  };
+
+  const formatDate = () => {
+    const checkup = new Date(date + (time ? `T${time}` : ""));
+    const dateStr = checkup.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    if (time) {
+      const timeStr = checkup.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      });
+      return `${dateStr} at ${timeStr}`;
+    }
+    return dateStr;
+  };
+
+  const remainingDays = done ? getRemainingDays() : 0;
+  const totalDays = done ? Math.min(Math.max(getRemainingDays(), 1), 365) : 1;
+  const progress = done
+    ? Math.max(0, Math.min(remainingDays / totalDays, 1))
+    : 0;
+  const radius = 60;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference * (1 - progress);
+
+  return (
+    <div
+      className="bg-white rounded-2xl p-5 mb-6"
+      style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.12)" }}
+      data-ocid="checkup_reminder.card"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div
+          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+          style={{ background: "linear-gradient(135deg, #C8A6E0, #8E5C9F)" }}
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            role="img"
+            aria-label="Calendar"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-lg font-bold" style={{ color: "#2B1F3A" }}>
+            Check Up Reminder
+          </h2>
+          <p className="text-xs" style={{ color: "#7A7386" }}>
+            Schedule your next check-up
+          </p>
+        </div>
+      </div>
+
+      {!done ? (
+        <div>
+          <div className="mb-3">
+            <label
+              htmlFor="checkup-date"
+              className="block text-sm font-medium mb-1"
+              style={{ color: "#2B1F3A" }}
+            >
+              Date
+            </label>
+            <input
+              id="checkup-date"
+              type="date"
+              value={date}
+              onChange={(e) => {
+                setDate(e.target.value);
+                setError("");
+              }}
+              className="w-full rounded-xl px-4 py-2 text-sm border outline-none transition-all"
+              style={{
+                borderColor: "#C8A6E0",
+                color: "#2B1F3A",
+                background: "#FAF5FF",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#8E5C9F";
+                e.target.style.boxShadow = "0 0 0 3px rgba(142,92,159,0.15)";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#C8A6E0";
+                e.target.style.boxShadow = "none";
+              }}
+              data-ocid="checkup_reminder.input"
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              htmlFor="checkup-time"
+              className="block text-sm font-medium mb-1"
+              style={{ color: "#2B1F3A" }}
+            >
+              Time
+            </label>
+            <input
+              id="checkup-time"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full rounded-xl px-4 py-2 text-sm border outline-none transition-all"
+              style={{
+                borderColor: "#C8A6E0",
+                color: "#2B1F3A",
+                background: "#FAF5FF",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#8E5C9F";
+                e.target.style.boxShadow = "0 0 0 3px rgba(142,92,159,0.15)";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#C8A6E0";
+                e.target.style.boxShadow = "none";
+              }}
+              data-ocid="checkup_reminder.input"
+            />
+          </div>
+          {error && (
+            <p
+              className="text-xs mb-3"
+              style={{ color: "#e05c7a" }}
+              data-ocid="checkup_reminder.error_state"
+            >
+              {error}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleDone}
+            className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 active:scale-98"
+            style={{ background: "#8E5C9F" }}
+            data-ocid="checkup_reminder.submit_button"
+          >
+            Done
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center">
+          <div className="relative" style={{ width: 160, height: 160 }}>
+            <svg
+              width="160"
+              height="160"
+              viewBox="0 0 160 160"
+              role="img"
+              aria-label="Checkup countdown"
+            >
+              <circle
+                cx="80"
+                cy="80"
+                r={radius}
+                fill="none"
+                stroke="#E8D5F5"
+                strokeWidth="12"
+              />
+              <circle
+                cx="80"
+                cy="80"
+                r={radius}
+                fill="none"
+                stroke="#8E5C9F"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                transform="rotate(-90 80 80)"
+                style={{ transition: "stroke-dashoffset 0.8s ease" }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-4xl font-bold" style={{ color: "#8E5C9F" }}>
+                {remainingDays <= 0 ? "0" : remainingDays}
+              </span>
+              <span
+                className="text-xs font-medium"
+                style={{ color: "#7A7386" }}
+              >
+                days left
+              </span>
+            </div>
+          </div>
+          {remainingDays <= 0 ? (
+            <p
+              className="mt-2 text-sm font-medium"
+              style={{ color: "#e05c7a" }}
+            >
+              Checkup date passed
+            </p>
+          ) : (
+            <p
+              className="mt-2 text-sm font-medium"
+              style={{ color: "#7A7386" }}
+            >
+              {formatDate()}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={handleEdit}
+            className="mt-4 w-full py-3 rounded-xl text-sm font-semibold transition-all hover:bg-purple-50"
+            style={{
+              border: "1.5px solid #8E5C9F",
+              color: "#8E5C9F",
+              background: "transparent",
+            }}
+            data-ocid="checkup_reminder.edit_button"
+          >
+            Edit
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Footer() {
+  const year = new Date().getFullYear();
+  const hostname =
+    typeof window !== "undefined" ? window.location.hostname : "";
+  const utmUrl = `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(hostname)}`;
+
+  return (
+    <footer
+      className="rounded-t-3xl mt-4 py-10 px-4 text-center"
+      style={{ background: "linear-gradient(135deg, #8E5C9F, #6B3A7D)" }}
+    >
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <p className="text-xl font-bold text-white">
+          You are doing amazing, Mom
+        </p>
+        <HeartIcon className="w-6 h-6" />
+      </div>
+      <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.75)" }}>
+        Mothera · Your pregnancy companion
+      </p>
+      <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
+        © {year}. Built with love using{" "}
+        <a
+          href={utmUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:opacity-80"
+        >
+          caffeine.ai
+        </a>
+      </p>
+    </footer>
+  );
+}
+
+// ─── MusicOverlay ─────────────────────────────────────────────────────────────
+const PREGNANCY_MUSIC = [
+  {
+    id: "lullabies",
+    title: "Relaxing Lullabies",
+    description: "Gentle lullabies to soothe you and your baby",
+    embedUrl:
+      "https://www.youtube.com/embed/videoseries?list=PLhQCJTkrHOwSX8LUnIMgaTq3chP1tiTut",
+    isPlaylist: true,
+    videoId: null,
+  },
+  {
+    id: "yoga",
+    title: "Prenatal Yoga Music",
+    description: "Peaceful music for your yoga and stretching sessions",
+    embedUrl: "https://www.youtube.com/embed/5qap5aO4i9A",
+    isPlaylist: false,
+    videoId: "5qap5aO4i9A",
+  },
+  {
+    id: "nature",
+    title: "Calming Nature Sounds",
+    description: "Natural soundscapes for deep relaxation",
+    embedUrl: "https://www.youtube.com/embed/1ZYbU82GVz4",
+    isPlaylist: false,
+    videoId: "1ZYbU82GVz4",
+  },
+  {
+    id: "classical",
+    title: "Classical Music for Baby",
+    description: "Classical compositions to stimulate your baby's development",
+    embedUrl: "https://www.youtube.com/embed/Wb4kUBBDKdY",
+    isPlaylist: false,
+    videoId: "Wb4kUBBDKdY",
+  },
+  {
+    id: "meditation",
+    title: "Breathing & Meditation",
+    description: "Guided breathing music for calm and mindfulness",
+    embedUrl: "https://www.youtube.com/embed/SEfs5TJZ6Nk",
+    isPlaylist: false,
+    videoId: "SEfs5TJZ6Nk",
+  },
+  {
+    id: "piano",
+    title: "Gentle Piano for Pregnancy",
+    description: "Soft piano melodies to ease stress and anxiety",
+    embedUrl: "https://www.youtube.com/embed/77ZozI0rw7w",
+    isPlaylist: false,
+    videoId: "77ZozI0rw7w",
+  },
+];
+
+function MusicCard({ item }: { item: (typeof PREGNANCY_MUSIC)[0] }) {
+  const [playing, setPlaying] = useState(false);
+
+  return (
+    <div
+      className="rounded-2xl overflow-hidden shadow-lg flex flex-col"
+      style={{
+        background: "rgba(255,255,255,0.12)",
+        border: "1px solid rgba(255,255,255,0.25)",
+      }}
+    >
+      {!playing ? (
+        <button
+          type="button"
+          className="relative w-full aspect-video cursor-pointer group"
+          onClick={() => setPlaying(true)}
+          aria-label={`Play ${item.title}`}
+          style={{ background: "linear-gradient(135deg, #6B3FA0, #9B6DC5)" }}
+        >
+          {item.isPlaylist ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <span style={{ fontSize: "3rem" }}>🎵</span>
+              <span className="text-white text-sm font-medium opacity-80">
+                Playlist
+              </span>
+            </div>
+          ) : (
+            <img
+              src={`https://img.youtube.com/vi/${item.videoId}/hqdefault.jpg`}
+              alt={item.title}
+              className="w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-all">
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center shadow-xl transition-transform group-hover:scale-110"
+              style={{ background: "rgba(255,255,255,0.9)" }}
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="#8E5C9F"
+                aria-hidden="true"
+              >
+                <title>Play</title>
+                <polygon points="5,3 19,12 5,21" />
+              </svg>
+            </div>
+          </div>
+        </button>
+      ) : (
+        <div className="w-full aspect-video">
+          <iframe
+            src={`${item.embedUrl}?autoplay=1`}
+            title={item.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="w-full h-full border-0"
+          />
+        </div>
+      )}
+      <div className="p-3">
+        <h3 className="font-semibold text-white text-sm">{item.title}</h3>
+        <p className="text-purple-200 text-xs mt-1 opacity-80">
+          {item.description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function MusicOverlay() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      {/* Floating Music Button */}
+      <button
+        type="button"
+        data-ocid="music.open_modal_button"
+        onClick={() => setIsOpen(true)}
+        aria-label="Pregnancy Music"
+        title="Pregnancy Music"
+        className="fixed bottom-24 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 cursor-pointer"
+        style={{ background: "linear-gradient(135deg, #8E5C9F, #B07CC6)" }}
+      >
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <title>Pregnancy Music</title>
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
+      </button>
+
+      {/* Full-Screen Music Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col"
+          data-ocid="music.modal"
+          style={{
+            background:
+              "linear-gradient(180deg, #3D1560 0%, #6B3FA0 40%, #9B6DC5 100%)",
+          }}
+        >
+          {/* Header */}
+          <div
+            className="flex items-center justify-between px-5 py-4 shrink-0"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.2)" }}
+          >
+            <div>
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                🎵 Pregnancy Music
+              </h2>
+              <p className="text-purple-200 text-xs mt-0.5">
+                Soothing music to help you and your baby relax
+              </p>
+            </div>
+            <button
+              type="button"
+              data-ocid="music.close_button"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close music"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-white transition-all hover:bg-white/20"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <title>Close</title>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Music Grid */}
+          <div className="flex-1 overflow-y-auto px-4 py-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto pb-6">
+              {PREGNANCY_MUSIC.map((item) => (
+                <MusicCard key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── TinaChatOverlay ──────────────────────────────────────────────────────────
+function TinaChatOverlay() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      {/* Floating Chat Button */}
+      <button
+        type="button"
+        data-ocid="chat.open_modal_button"
+        onClick={() => setIsOpen(true)}
+        aria-label="Chat with Tina"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 cursor-pointer"
+        style={{ background: "linear-gradient(135deg, #8E5C9F, #B07CC6)" }}
+      >
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <title>Chat with Tina</title>
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <span
+          className="absolute top-1 right-1 w-3 h-3 rounded-full border-2 border-white"
+          style={{ background: "#22C55E" }}
+        />
+      </button>
+
+      {/* Full-Screen Chat Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col"
+          data-ocid="chat.modal"
+          style={{
+            background: "linear-gradient(180deg, #F8F4FB 0%, #EDE4F5 100%)",
+          }}
+        >
+          <AIChat onClose={() => setIsOpen(false)} />
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── App ──────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasCompletedProfile, setHasCompletedProfile] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const autoMonth = userInfo?.pregnancyWeek
+    ? Math.min(
+        Math.max(
+          Math.ceil(Number.parseInt(userInfo.pregnancyWeek) / 4.3) - 1,
+          0,
+        ),
+        9,
+      )
+    : null;
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(autoMonth);
+  if (!isLoggedIn) {
+    return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+  }
+  if (!hasCompletedProfile) {
+    return (
+      <PersonalInfoPage
+        onComplete={(data) => {
+          setUserInfo(data);
+          setHasCompletedProfile(true);
+          if (data.pregnancyWeek) {
+            const m = Math.min(
+              Math.max(
+                Math.ceil(Number.parseInt(data.pregnancyWeek) / 4.3) - 1,
+                0,
+              ),
+              9,
+            );
+            setSelectedMonth(m);
+          }
+        }}
+      />
+    );
+  }
+  return (
+    <div
+      style={{
+        background: "linear-gradient(180deg, #F8F4FB 0%, #EDE4F5 100%)",
+        minHeight: "100vh",
+      }}
+    >
+      <GlobalNotifications />
+      <NavBar onLogout={() => setIsLoggedIn(false)} />
+      <main className="max-w-6xl mx-auto px-4 lg:px-12 pb-0">
+        {/* Desktop: Hello Mom + Timeline side-by-side */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start mb-0">
+          <div>
+            <Header
+              selectedMonth={selectedMonth}
+              userName={userInfo?.firstName || ""}
+              userInfo={userInfo}
+            />
+            <PregnancyTracker />
+            <Baby360Viewer selectedMonth={selectedMonth} />
+          </div>
+          <div className="lg:pt-6">
+            <CircularTimeline
+              selectedMonth={selectedMonth}
+              setSelectedMonth={setSelectedMonth}
+            />
+          </div>
+        </div>
+
+        {selectedMonth !== null && (
+          <div
+            className="bg-white rounded-2xl p-6 mb-0"
+            style={{ boxShadow: "0 10px 25px rgba(142,92,159,0.1)" }}
+          >
+            <h2
+              className="text-lg font-semibold mb-4"
+              style={{ color: "#2B1F3A" }}
+            >
+              Month Details
+            </h2>
+            <MonthDetailCard
+              data={MONTH_DATA[selectedMonth]}
+              onClose={() => setSelectedMonth(null)}
+            />
+          </div>
+        )}
+
+        <MedicineReminderModule />
+
+        {/* Desktop: Emergency full-width centered */}
+        <div className="lg:max-w-2xl lg:mx-auto">
+          <EmergencySOS
+            emergencyContact={
+              userInfo?.emergencyName
+                ? {
+                    name: userInfo.emergencyName,
+                    phone: userInfo.emergencyPhone,
+                  }
+                : null
+            }
+          />
+        </div>
+
+        <HealthWellness />
+
+        {/* Desktop: CheckUp + Nearby side-by-side */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start">
+          <CheckUpReminder />
+          <NearbyHelp />
+        </div>
+
+        <DoctorConnect
+          userDoctorName={userInfo?.doctorName || ""}
+          userPhone={userInfo?.phone || ""}
+        />
+      </main>
+      <Footer />
+      <MusicOverlay />
+      <TinaChatOverlay />
+    </div>
+  );
+}
+```
+
+---
+## 6. Global Styles — src/frontend/src/index.css
+```css
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 1rem;
+    --background: 0.97 0.01 307;
+    --foreground: 0.23 0.05 307;
+    --card: 1 0 0;
+    --card-foreground: 0.23 0.05 307;
+    --popover: 1 0 0;
+    --popover-foreground: 0.23 0.05 307;
+    --primary: 0.48 0.13 307;
+    --primary-foreground: 1 0 0;
+    --secondary: 0.89 0.05 307;
+    --secondary-foreground: 0.48 0.13 307;
+    --muted: 0.94 0.02 307;
+    --muted-foreground: 0.52 0.02 307;
+    --accent: 0.91 0.04 220;
+    --accent-foreground: 0.23 0.05 307;
+    --destructive: 0.58 0.17 22;
+    --destructive-foreground: 1 0 0;
+    --border: 0.91 0.03 307;
+    --input: 0.91 0.03 307;
+    --ring: 0.48 0.13 307;
+    --chart-1: 0.88 0.06 0;
+    --chart-2: 0.91 0.06 70;
+    --chart-3: 0.89 0.05 307;
+    --chart-4: 0.91 0.04 220;
+    --chart-5: 0.48 0.13 307;
+    --sidebar: 1 0 0;
+    --sidebar-foreground: 0.23 0.05 307;
+    --sidebar-primary: 0.48 0.13 307;
+    --sidebar-primary-foreground: 1 0 0;
+    --sidebar-accent: 0.89 0.05 307;
+    --sidebar-accent-foreground: 0.48 0.13 307;
+    --sidebar-border: 0.91 0.03 307;
+    --sidebar-ring: 0.48 0.13 307;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Inter", sans-serif;
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(142, 92, 159, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px 8px rgba(142, 92, 159, 0.3);
+  }
+}
+
+@keyframes pulseRed {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(224, 82, 77, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 24px 10px rgba(224, 82, 77, 0.3);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+
+@keyframes messageAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes segmentPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(142, 92, 159, 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(142, 92, 159, 0.9));
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+.animate-pulse-red {
+  animation: pulseRed 2s infinite;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-message-appear {
+  animation: messageAppear 0.3s ease-out forwards;
+}
+
+.segment-current {
+  animation: segmentPulse 2s infinite;
+}
+
+.progress-bar-animated {
+  animation: progressFill 1.2s ease-out forwards;
+}
+
+.card-hover {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 35px rgba(142, 92, 159, 0.18);
+}
+
+@keyframes typingDot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #8e5c9f;
+  display: inline-block;
+  margin: 0 2px;
+  animation: typingDot 1.2s infinite;
+}
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+```
+
+---
+## 7. Tailwind Config — src/frontend/tailwind.config.js
+```js
+import typography from "@tailwindcss/typography";
+import containerQueries from "@tailwindcss/container-queries";
+import animate from "tailwindcss-animate";
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: ["class"],
+  content: ["index.html", "src/**/*.{js,ts,jsx,tsx,html,css}"],
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      colors: {
+        border: "oklch(var(--border))",
+        input: "oklch(var(--input))",
+        ring: "oklch(var(--ring) / <alpha-value>)",
+        background: "oklch(var(--background))",
+        foreground: "oklch(var(--foreground))",
+        primary: {
+          DEFAULT: "oklch(var(--primary) / <alpha-value>)",
+          foreground: "oklch(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "oklch(var(--secondary) / <alpha-value>)",
+          foreground: "oklch(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "oklch(var(--destructive) / <alpha-value>)",
+          foreground: "oklch(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "oklch(var(--muted) / <alpha-value>)",
+          foreground: "oklch(var(--muted-foreground) / <alpha-value>)",
+        },
+        accent: {
+          DEFAULT: "oklch(var(--accent) / <alpha-value>)",
+          foreground: "oklch(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "oklch(var(--popover))",
+          foreground: "oklch(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "oklch(var(--card))",
+          foreground: "oklch(var(--card-foreground))",
+        },
+        chart: {
+          1: "oklch(var(--chart-1))",
+          2: "oklch(var(--chart-2))",
+          3: "oklch(var(--chart-3))",
+          4: "oklch(var(--chart-4))",
+          5: "oklch(var(--chart-5))",
+        },
+        sidebar: {
+          DEFAULT: "oklch(var(--sidebar))",
+          foreground: "oklch(var(--sidebar-foreground))",
+          primary: "oklch(var(--sidebar-primary))",
+          "primary-foreground": "oklch(var(--sidebar-primary-foreground))",
+          accent: "oklch(var(--sidebar-accent))",
+          "accent-foreground": "oklch(var(--sidebar-accent-foreground))",
+          border: "oklch(var(--sidebar-border))",
+          ring: "oklch(var(--sidebar-ring))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        xs: "0 1px 2px 0 rgba(0,0,0,0.05)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
+    },
+  },
+  plugins: [typography, containerQueries, animate],
+};
+```
+
+---
+## 8. Config — src/frontend/src/config.ts
+```ts
+import {
+  createActor,
+  type backendInterface,
+  type CreateActorOptions,
+  ExternalBlob,
+} from "./backend";
+import { StorageClient } from "./utils/StorageClient";
+import { HttpAgent } from "@icp-sdk/core/agent";
+
+const DEFAULT_STORAGE_GATEWAY_URL = "https://blob.caffeine.ai";
+const DEFAULT_BUCKET_NAME = "default-bucket";
+const DEFAULT_PROJECT_ID = "0000000-0000-0000-0000-00000000000";
+
+interface JsonConfig {
+  backend_host: string;
+  backend_canister_id: string;
+  project_id: string;
+  ii_derivation_origin: string;
+}
+
+interface Config {
+  backend_host?: string;
+  backend_canister_id: string;
+  storage_gateway_url: string;
+  bucket_name: string;
+  project_id: string;
+  ii_derivation_origin?: string;
+}
+
+let configCache: Config | null = null;
+
+export async function loadConfig(): Promise<Config> {
+  if (configCache) {
+    return configCache;
+  }
+  const backendCanisterId = process.env.CANISTER_ID_BACKEND;
+  const envBaseUrl = process.env.BASE_URL || "/";
+  const baseUrl = envBaseUrl.endsWith("/") ? envBaseUrl : `${envBaseUrl}/`;
+  try {
+    const response = await fetch(`${baseUrl}env.json`);
+    const config = (await response.json()) as JsonConfig;
+    if (!backendCanisterId && config.backend_canister_id === "undefined") {
+      console.error("CANISTER_ID_BACKEND is not set");
+      throw new Error("CANISTER_ID_BACKEND is not set");
+    }
+
+    const fullConfig = {
+      backend_host:
+        config.backend_host === "undefined" ? undefined : config.backend_host,
+      backend_canister_id: (config.backend_canister_id === "undefined"
+        ? backendCanisterId
+        : config.backend_canister_id) as string,
+      storage_gateway_url: process.env.STORAGE_GATEWAY_URL ?? "nogateway",
+      bucket_name: DEFAULT_BUCKET_NAME,
+      project_id:
+        config.project_id !== "undefined"
+          ? config.project_id
+          : DEFAULT_PROJECT_ID,
+      ii_derivation_origin:
+        config.ii_derivation_origin === "undefined"
+          ? undefined
+          : config.ii_derivation_origin,
+    };
+    configCache = fullConfig;
+    return fullConfig;
+  } catch {
+    if (!backendCanisterId) {
+      console.error("CANISTER_ID_BACKEND is not set");
+      throw new Error("CANISTER_ID_BACKEND is not set");
+    }
+    const fallbackConfig = {
+      backend_host: undefined,
+      backend_canister_id: backendCanisterId,
+      storage_gateway_url: DEFAULT_STORAGE_GATEWAY_URL,
+      bucket_name: DEFAULT_BUCKET_NAME,
+      project_id: DEFAULT_PROJECT_ID,
+      ii_derivation_origin: undefined,
+    };
+    return fallbackConfig;
+  }
+}
+
+function extractAgentErrorMessage(error: string): string {
+  const errorString = String(error);
+  const match = errorString.match(/with message:\s*'([^']+)'/s);
+  return match ? match[1] : errorString;
+}
+
+function processError(e: unknown): never {
+  if (e && typeof e === "object" && "message" in e) {
+    throw new Error(extractAgentErrorMessage(`${e.message}`));
+  }
+  throw e;
+}
+
+async function maybeLoadMockBackend(): Promise<backendInterface | null> {
+  if (import.meta.env.VITE_USE_MOCK !== "true") {
+    return null;
+  }
+
+  try {
+    // If VITE_USE_MOCK is enabled, try to load a mock backend module *if it exists*.
+    // We use import.meta.glob so builds don't fail when the mock file is absent.
+    const mockModules = import.meta.glob("./mocks/backend.{ts,tsx,js,jsx}");
+
+    const path = Object.keys(mockModules)[0];
+    if (!path) return null;
+
+    const mod = (await mockModules[path]()) as {
+      mockBackend?: backendInterface;
+    };
+
+    return mod.mockBackend ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function createActorWithConfig(
+  options?: CreateActorOptions,
+): Promise<backendInterface> {
+  // Attempt to load mock backend if enabled
+  const mock = await maybeLoadMockBackend();
+  if (mock) {
+    return mock;
+  }
+
+  const config = await loadConfig();
+  const resolvedOptions = options ?? {};
+  const agent = new HttpAgent({
+    ...resolvedOptions.agentOptions,
+    host: config.backend_host,
+  });
+  if (config.backend_host?.includes("localhost")) {
+    await agent.fetchRootKey().catch((err) => {
+      console.warn(
+        "Unable to fetch root key. Check to ensure that your local replica is running",
+      );
+      console.error(err);
+    });
+  }
+  const actorOptions = {
+    ...resolvedOptions,
+    agent: agent,
+    processError,
+  };
+
+  const storageClient = new StorageClient(
+    config.bucket_name,
+    config.storage_gateway_url,
+    config.backend_canister_id,
+    config.project_id,
+    agent,
+  );
+
+  const MOTOKO_DEDUPLICATION_SENTINEL = "!caf!";
+
+  const uploadFile = async (file: ExternalBlob): Promise<Uint8Array> => {
+    const { hash } = await storageClient.putFile(
+      await file.getBytes(),
+      file.onProgress,
+    );
+    return new TextEncoder().encode(MOTOKO_DEDUPLICATION_SENTINEL + hash);
+  };
+
+  const downloadFile = async (bytes: Uint8Array): Promise<ExternalBlob> => {
+    const hashWithPrefix = new TextDecoder().decode(new Uint8Array(bytes));
+    const hash = hashWithPrefix.substring(MOTOKO_DEDUPLICATION_SENTINEL.length);
+    const url = await storageClient.getDirectURL(hash);
+    return ExternalBlob.fromURL(url);
+  };
+
+  return createActor(
+    config.backend_canister_id,
+    uploadFile,
+    downloadFile,
+    actorOptions,
+  );
+}
+```
+
+---
+## 9. Utilities — src/frontend/src/lib/utils.ts
+```ts
+import type { ClassValue } from "clsx";
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
+}
+```

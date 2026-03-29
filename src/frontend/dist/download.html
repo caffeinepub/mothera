@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Download Mothera Code Document</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 50%, #fce7f3 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 48px 40px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(139, 92, 246, 0.15);
+      max-width: 480px;
+      width: 90%;
+    }
+    .logo {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #8b5cf6, #c084dc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-size: 1.25rem;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #6b7280;
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #8b5cf6, #c084dc);
+      color: white;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(139, 92, 246, 0.45);
+    }
+    .back { margin-top: 24px; }
+    .back a { color: #8b5cf6; text-decoration: none; font-size: 0.9rem; }
+    .back a:hover { text-decoration: underline; }
+    .info { font-size: 0.82rem; color: #9ca3af; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">Mothera</div>
+    <h1>Code Document</h1>
+    <p>Complete source code for the Mothera maternal health dashboard — all modules, components, and configurations.</p>
+    <a class="btn" href="/Mothera_Code_Document.md" download="Mothera_Code_Document.md">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+      </svg>
+      Download Code Document
+    </a>
+    <p class="info">~164 KB · Markdown (.md) · Opens in any text editor or VS Code</p>
+    <div class="back"><a href="/">← Back to Mothera</a></div>
+  </div>
+</body>
+</html>
