@@ -2,6 +2,139 @@ import { useEffect, useRef, useState } from "react";
 import LoginPage from "./LoginPage";
 import PersonalInfoPage, { type UserInfo } from "./PersonalInfoPage";
 
+// ─── Global Notification System ───────────────────────────────────────────────
+type NotifType = { id: number; message: string; type: "warning" | "urgent" };
+let notifListeners: ((n: NotifType) => void)[] = [];
+const shownNotifKeys = new Set<string>();
+function emitNotif(n: Omit<NotifType, "id">) {
+  const key = `${n.type}|${n.message}`;
+  if (shownNotifKeys.has(key)) return;
+  shownNotifKeys.add(key);
+  const notif = { ...n, id: Date.now() };
+  for (const fn of notifListeners) fn(notif);
+  // Clear key after 60s so same alert can re-appear next day
+  setTimeout(() => shownNotifKeys.delete(key), 60000);
+}
+
+function GlobalNotifications() {
+  const [notifs, setNotifs] = useState<NotifType[]>([]);
+  useEffect(() => {
+    const handler = (n: NotifType) => {
+      setNotifs((prev) => [...prev, n]);
+      setTimeout(() => {
+        setNotifs((prev) => prev.filter((x) => x.id !== n.id));
+      }, 8000);
+    };
+    notifListeners.push(handler);
+    return () => {
+      notifListeners = notifListeners.filter((fn) => fn !== handler);
+    };
+  }, []);
+  if (notifs.length === 0) return null;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: "24px",
+        right: "24px",
+        zIndex: 9999,
+        display: "flex",
+        flexDirection: "column",
+        gap: "12px",
+        alignItems: "flex-end",
+        maxWidth: "380px",
+      }}
+    >
+      {notifs.map((n) => (
+        <div
+          key={n.id}
+          style={{
+            background:
+              n.type === "warning"
+                ? "linear-gradient(135deg, #FF8C42 0%, #FFB347 100%)"
+                : "linear-gradient(135deg, #8E5C9F 0%, #C084DE 100%)",
+            color: "#fff",
+            borderRadius: "16px",
+            padding: "14px 16px",
+            boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "12px",
+            minWidth: "300px",
+            animation: "slideInRight 0.3s ease-out",
+            position: "relative",
+          }}
+        >
+          <div
+            style={{
+              fontSize: "22px",
+              lineHeight: 1,
+              flexShrink: 0,
+              marginTop: "2px",
+            }}
+          >
+            {n.type === "warning" ? "💊" : "🗓️"}
+          </div>
+          <div style={{ flex: 1 }}>
+            <p
+              style={{
+                fontWeight: 700,
+                fontSize: "13px",
+                margin: "0 0 4px",
+                lineHeight: 1.2,
+              }}
+            >
+              {n.type === "warning"
+                ? "⚠️ Medicine Stock Alert"
+                : "📌 Checkup Reminder"}
+            </p>
+            <p
+              style={{
+                fontSize: "13px",
+                margin: 0,
+                lineHeight: 1.5,
+                opacity: 0.95,
+              }}
+            >
+              {n.message}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() =>
+              setNotifs((prev) => prev.filter((x) => x.id !== n.id))
+            }
+            style={{
+              background: "rgba(255,255,255,0.25)",
+              border: "none",
+              borderRadius: "50%",
+              width: "22px",
+              height: "22px",
+              cursor: "pointer",
+              color: "#fff",
+              fontWeight: 700,
+              fontSize: "14px",
+              lineHeight: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+            aria-label="Dismiss notification"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+      <style>
+        {
+          "@keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }"
+        }
+      </style>
+    </div>
+  );
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface MonthData {
   month: number;
@@ -1103,6 +1236,7 @@ interface MedicineEntry {
   name: string;
   amount: number | "";
   times: string[];
+  timeInputs: Record<string, string>;
   whenToTake: "before" | "after" | "";
 }
 
@@ -1121,6 +1255,7 @@ function MedicineReminderPanel({
       name: "",
       amount: "",
       times: [],
+      timeInputs: {},
       whenToTake: "",
     },
   ]);
@@ -1142,6 +1277,7 @@ function MedicineReminderPanel({
         name: "",
         amount: "",
         times: [],
+        timeInputs: {},
         whenToTake: "",
       },
     ]);
@@ -1177,6 +1313,16 @@ function MedicineReminderPanel({
   const setWhen = (id: number, whenToTake: "before" | "after") => {
     setEntries((prev) =>
       prev.map((e) => (e.id === id ? { ...e, whenToTake } : e)),
+    );
+  };
+
+  const updateTimeInput = (id: number, timePeriod: string, value: string) => {
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id === id
+          ? { ...e, timeInputs: { ...e.timeInputs, [timePeriod]: value } }
+          : e,
+      ),
     );
   };
 
@@ -1251,7 +1397,18 @@ function MedicineReminderPanel({
               </div>
               {entry.times.length > 0 && (
                 <p className="text-xs text-center" style={{ color: "#7A7386" }}>
-                  {entry.times.join(", ")}
+                  {entry.times
+                    .map((t) => {
+                      const raw = entry.timeInputs[t];
+                      if (!raw) return t;
+                      const [hStr, mStr] = raw.split(":");
+                      const h = Number.parseInt(hStr, 10);
+                      const m = mStr;
+                      const ampm = h >= 12 ? "PM" : "AM";
+                      const h12 = h % 12 || 12;
+                      return `${t} ${h12}:${m} ${ampm}`;
+                    })
+                    .join(", ")}
                   {entry.whenToTake ? ` · ${entry.whenToTake} food` : ""}
                 </p>
               )}
@@ -1366,53 +1523,70 @@ function MedicineReminderPanel({
                   {timeOptions.map((time) => {
                     const checked = entry.times.includes(time);
                     return (
-                      <label
-                        key={time}
-                        data-ocid={`medicine.checkbox.${idx + 1}`}
-                        className="flex items-center gap-1.5 cursor-pointer select-none"
-                      >
-                        <input
-                          type="checkbox"
-                          className="sr-only"
-                          checked={checked}
-                          onChange={() => toggleTime(entry.id, time)}
-                          aria-label={time}
-                        />
-                        <span
-                          className="w-4.5 h-4.5 rounded flex items-center justify-center transition-all"
-                          style={{
-                            width: "18px",
-                            height: "18px",
-                            background: checked ? "#8E5C9F" : "#fff",
-                            border: checked ? "none" : "1.5px solid #CDB9E9",
-                            flexShrink: 0,
-                          }}
+                      <div key={time} className="flex flex-col gap-1">
+                        <label
+                          data-ocid={`medicine.checkbox.${idx + 1}`}
+                          className="flex items-center gap-1.5 cursor-pointer select-none"
                         >
-                          {checked && (
-                            <svg
-                              width="10"
-                              height="8"
-                              viewBox="0 0 10 8"
-                              fill="none"
-                              aria-hidden="true"
-                            >
-                              <path
-                                d="M1 4l3 3 5-6"
-                                stroke="#fff"
-                                strokeWidth="1.8"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          )}
-                        </span>
-                        <span
-                          className="text-xs font-medium"
-                          style={{ color: checked ? "#8E5C9F" : "#7A7386" }}
-                        >
-                          {time}
-                        </span>
-                      </label>
+                          <input
+                            type="checkbox"
+                            className="sr-only"
+                            checked={checked}
+                            onChange={() => toggleTime(entry.id, time)}
+                            aria-label={time}
+                          />
+                          <span
+                            className="w-4.5 h-4.5 rounded flex items-center justify-center transition-all"
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              background: checked ? "#8E5C9F" : "#fff",
+                              border: checked ? "none" : "1.5px solid #CDB9E9",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {checked && (
+                              <svg
+                                width="10"
+                                height="8"
+                                viewBox="0 0 10 8"
+                                fill="none"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M1 4l3 3 5-6"
+                                  stroke="#fff"
+                                  strokeWidth="1.8"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            )}
+                          </span>
+                          <span
+                            className="text-xs font-medium"
+                            style={{ color: checked ? "#8E5C9F" : "#7A7386" }}
+                          >
+                            {time}
+                          </span>
+                        </label>
+                        {checked && (
+                          <input
+                            type="time"
+                            value={entry.timeInputs[time] || ""}
+                            onChange={(e) =>
+                              updateTimeInput(entry.id, time, e.target.value)
+                            }
+                            className="px-2 py-1 rounded-lg text-xs outline-none transition-all"
+                            style={{
+                              background: "#fff",
+                              border: "1.5px solid #CDB9E9",
+                              color: "#2B1F3A",
+                              width: "90px",
+                            }}
+                          />
+                        )}
+                      </div>
                     );
                   })}
                 </div>
@@ -1561,7 +1735,35 @@ function MedicineReminderModule() {
   const handleSave = (entries: MedicineEntry[]) => {
     setSavedEntries(entries);
     setSaved(true);
+    // Immediately check if any medicine is low stock
+    for (const entry of entries) {
+      if (
+        typeof entry.amount === "number" &&
+        entry.amount > 0 &&
+        entry.amount < 10
+      ) {
+        emitNotif({
+          type: "warning",
+          message: `"${entry.name || "Medicine"}" is less than 10. Please Restock the medicine at your nearby Shop.`,
+        });
+      }
+    }
   };
+
+  useEffect(() => {
+    for (const entry of savedEntries) {
+      if (
+        typeof entry.amount === "number" &&
+        entry.amount > 0 &&
+        entry.amount < 10
+      ) {
+        emitNotif({
+          type: "warning",
+          message: `"${entry.name || "Medicine"}" is less than 10. Please Restock the medicine at your nearby Shop.`,
+        });
+      }
+    }
+  }, [savedEntries]);
 
   return (
     <div id="medicine-reminder" className="mb-6">
@@ -2981,11 +3183,45 @@ function CheckUpReminder() {
     }
     setError("");
     setDone(true);
+    const days = getRemainingDays();
+    if (days <= 0) {
+      const timeDisplay = time
+        ? new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+          })
+        : "Not specified";
+      emitNotif({
+        type: "urgent",
+        message: `Today is your Checkup. Time: ${timeDisplay}`,
+      });
+    }
   };
 
   const handleEdit = () => {
     setDone(false);
   };
+
+  // Re-check every minute while app is open on checkup day
+  useEffect(() => {
+    if (!done || !date) return;
+    const interval = setInterval(() => {
+      const days = getRemainingDays();
+      if (days <= 0) {
+        const timeDisplay = time
+          ? new Date(`2000-01-01T${time}`).toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+            })
+          : "Not specified";
+        emitNotif({
+          type: "urgent",
+          message: `Today is your Checkup. Time: ${timeDisplay}`,
+        });
+      }
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [done, date, time]);
 
   const getRemainingDays = () => {
     const today = new Date();
@@ -3576,6 +3812,7 @@ export default function App() {
         minHeight: "100vh",
       }}
     >
+      <GlobalNotifications />
       <NavBar onLogout={() => setIsLoggedIn(false)} />
       <main className="max-w-6xl mx-auto px-4 lg:px-12 pb-0">
         {/* Desktop: Hello Mom + Timeline side-by-side */}
