@@ -1071,10 +1071,68 @@ function CircularTimeline({
 
 // ─── Components ───────────────────────────────────────────────────────────────
 function NavBar({ onLogout }: { onLogout: () => void }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState("dashboard");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const sectionIds = ["dashboard", "timeline", "wellness", "connect"];
+    const observers: IntersectionObserver[] = [];
+
+    for (const id of sectionIds) {
+      const el = document.getElementById(id);
+      if (!el) continue;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) setActiveSection(id);
+        },
+        { rootMargin: "-40% 0px -50% 0px", threshold: 0 },
+      );
+      observer.observe(el);
+      observers.push(observer);
+    }
+
+    return () => {
+      for (const o of observers) o.disconnect();
+    };
+  }, []);
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    id: string,
+  ) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      const navHeight = 64;
+      const top =
+        el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
+  };
+
+  const navItems = ["Dashboard", "Timeline", "Wellness", "Connect"];
+
   return (
     <nav
-      className="sticky top-0 z-50 bg-white px-4 py-2"
-      style={{ boxShadow: "0 2px 12px rgba(142,92,159,0.1)" }}
+      className="sticky top-0 z-50 px-4 transition-all duration-300"
+      style={{
+        background: scrolled ? "rgba(255,255,255,0.95)" : "#ffffff",
+        backdropFilter: scrolled ? "blur(12px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+        boxShadow: scrolled
+          ? "0 4px 24px rgba(142,92,159,0.18)"
+          : "0 2px 12px rgba(142,92,159,0.08)",
+        paddingTop: scrolled ? "6px" : "8px",
+        paddingBottom: scrolled ? "6px" : "8px",
+      }}
       data-ocid="nav.panel"
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -1082,29 +1140,46 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
           <img
             src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
             alt="Mothera – Maternal Health Care"
-            className="h-14 w-auto object-contain"
+            className="transition-all duration-300"
+            style={{
+              height: scrolled ? "44px" : "56px",
+              width: "auto",
+              objectFit: "contain",
+            }}
           />
-          <span className="font-bold text-xl" style={{ color: "#8E5C9F" }}>
+          <span
+            className="font-bold transition-all duration-300"
+            style={{ color: "#8E5C9F", fontSize: scrolled ? "18px" : "20px" }}
+          >
             Mothera
           </span>
         </div>
         <div className="flex items-center gap-1">
           <div className="hidden md:flex items-center gap-1">
-            {["Dashboard", "Timeline", "Wellness", "Connect"].map((item, i) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                data-ocid={`nav.link.${i + 1}`}
-                className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200"
-                style={
-                  i === 0
-                    ? { background: "#E8D5F5", color: "#8E5C9F" }
-                    : { color: "#7A7386" }
-                }
-              >
-                {item}
-              </a>
-            ))}
+            {navItems.map((item, i) => {
+              const id = item.toLowerCase();
+              const isActive = activeSection === id;
+              return (
+                <a
+                  key={item}
+                  href={`#${id}`}
+                  onClick={(e) => handleNavClick(e, id)}
+                  data-ocid={`nav.link.${i + 1}`}
+                  className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300"
+                  style={
+                    isActive
+                      ? {
+                          background: "#E8D5F5",
+                          color: "#8E5C9F",
+                          transform: "scale(1.05)",
+                        }
+                      : { color: "#7A7386", background: "transparent" }
+                  }
+                >
+                  {item}
+                </a>
+              );
+            })}
           </div>
           <button
             type="button"
@@ -2718,7 +2793,7 @@ function HealthWellness() {
   const activeItem = items.find((item) => item.label === activeCategory)!;
 
   return (
-    <div className="mb-6">
+    <div id="wellness" className="mb-6">
       <h2 className="text-lg font-semibold mb-4" style={{ color: "#2B1F3A" }}>
         Health &amp; Wellness
       </h2>
