@@ -3537,11 +3537,6 @@ function CheckUpReminder() {
 }
 
 function Footer() {
-  const year = new Date().getFullYear();
-  const hostname =
-    typeof window !== "undefined" ? window.location.hostname : "";
-  const utmUrl = `https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(hostname)}`;
-
   return (
     <footer
       className="rounded-t-3xl mt-4 py-10 px-4 text-center"
@@ -3555,17 +3550,6 @@ function Footer() {
       </div>
       <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.75)" }}>
         Mothera · Your pregnancy companion
-      </p>
-      <p className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
-        © {year}. Built with love using{" "}
-        <a
-          href={utmUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:opacity-80"
-        >
-          caffeine.ai
-        </a>
       </p>
     </footer>
   );
