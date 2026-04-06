@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import BabyDashboard from "./BabyDashboard";
+import BabyInfoPage, { type BabyUserInfo } from "./BabyInfoPage";
 import LoginPage from "./LoginPage";
 import PersonalInfoPage, { type UserInfo } from "./PersonalInfoPage";
+import RoleSelectionPage from "./RoleSelectionPage";
 
 // ─── Global Notification System ───────────────────────────────────────────────
 type NotifType = { id: number; message: string; type: "warning" | "urgent" };
@@ -3829,8 +3832,10 @@ function TinaChatOverlay() {
 // ─── App ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState<"pregnancy" | "baby" | null>(null);
   const [hasCompletedProfile, setHasCompletedProfile] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [babyUserInfo, setBabyUserInfo] = useState<BabyUserInfo | null>(null);
   const autoMonth = userInfo?.pregnancyWeek
     ? Math.min(
         Math.max(
@@ -3844,7 +3849,38 @@ export default function App() {
   if (!isLoggedIn) {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
   }
-  if (!hasCompletedProfile) {
+  if (!role) {
+    return (
+      <RoleSelectionPage
+        onPregnancy={() => setRole("pregnancy")}
+        onBaby={() => setRole("baby")}
+      />
+    );
+  }
+  if (role === "baby" && !hasCompletedProfile) {
+    return (
+      <BabyInfoPage
+        onComplete={(data) => {
+          setBabyUserInfo(data);
+          setHasCompletedProfile(true);
+        }}
+      />
+    );
+  }
+  if (role === "baby" && hasCompletedProfile) {
+    return (
+      <BabyDashboard
+        babyUserInfo={babyUserInfo!}
+        onLogout={() => {
+          setIsLoggedIn(false);
+          setRole(null);
+          setHasCompletedProfile(false);
+          setBabyUserInfo(null);
+        }}
+      />
+    );
+  }
+  if (role === "pregnancy" && !hasCompletedProfile) {
     return (
       <PersonalInfoPage
         onComplete={(data) => {
