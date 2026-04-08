@@ -2002,12 +2002,10 @@ function NavBar({
   motherName,
   babyName,
 }: { onLogout: () => void; motherName: string; babyName: string }) {
-  const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("baby-care");
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
       const sections = ["baby-care", "wellness", "community", "products"];
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id);
@@ -2035,36 +2033,35 @@ function NavBar({
   ];
 
   return (
-    <header
-      className="sticky top-0 z-40 transition-all duration-300"
+    <nav
+      className="fixed bottom-0 left-0 right-0 w-full z-40 transition-all duration-300"
       style={{
-        background: scrolled
-          ? "rgba(248,244,251,0.92)"
-          : "rgba(248,244,251,0.75)",
-        backdropFilter: scrolled ? "blur(16px)" : "blur(6px)",
-        boxShadow: scrolled ? "0 4px 24px rgba(142,92,159,0.15)" : "none",
-        borderBottom: scrolled ? "1px solid rgba(192,132,222,0.2)" : "none",
-        padding: scrolled ? "8px 0" : "14px 0",
+        background: "rgba(248,244,251,0.97)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        boxShadow: "0 -4px 24px rgba(142,92,159,0.15)",
+        borderTop: "1.5px solid rgba(192,132,222,0.2)",
+        height: "64px",
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 lg:px-8 flex items-center justify-between gap-4">
+      <div className="max-w-6xl mx-auto h-full flex items-center justify-between px-4 gap-2">
         {/* Brand */}
-        <div className="flex items-center gap-2.5 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <img
             src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
             alt="Mothera"
-            className="w-9 h-9 rounded-full object-cover border-2 border-purple-200"
+            className="w-8 h-8 rounded-full object-cover border-2 border-purple-200"
           />
           <span
             style={{ fontFamily: "Fraunces, serif" }}
-            className="text-xl font-bold text-purple-700"
+            className="text-base font-bold text-purple-700 hidden sm:block"
           >
             Mothera
           </span>
         </div>
 
-        {/* Nav Links */}
-        <nav className="hidden md:flex items-center gap-1">
+        {/* Nav Links — centered */}
+        <div className="flex items-center gap-1 flex-1 justify-center">
           {navLinks.map(({ id, icon: Icon, label }) => (
             <button
               type="button"
@@ -2078,19 +2075,20 @@ function NavBar({
               data-ocid={`nav.${id}.link`}
             >
               <Icon className="w-3.5 h-3.5" />
-              {label}
+              <span className="hidden sm:inline">{label}</span>
+              <span className="sm:hidden text-xs">{label.split(" ")[0]}</span>
             </button>
           ))}
-        </nav>
+        </div>
 
         {/* Greeting + Logout */}
-        <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
-            <div className="text-sm font-semibold text-purple-700">
-              Hello, {motherName || "Mom"}! 💜
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="text-right hidden md:block">
+            <div className="text-xs font-semibold text-purple-700 leading-tight">
+              {motherName || "Mom"} 💜
             </div>
             {babyName && (
-              <div className="text-xs text-purple-400">Baby {babyName} 👶</div>
+              <div className="text-xs text-purple-400">Baby {babyName}</div>
             )}
           </div>
           <Button
@@ -2100,11 +2098,12 @@ function NavBar({
             className="rounded-xl border-purple-200 text-purple-600 hover:bg-purple-50 text-xs gap-1"
             data-ocid="nav.logout.button"
           >
-            <LogOut className="w-3.5 h-3.5" /> Logout
+            <LogOut className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Logout</span>
           </Button>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
 
@@ -2135,7 +2134,7 @@ export default function BabyDashboard({
 
       <NavBar onLogout={onLogout} motherName={motherName} babyName={babyName} />
 
-      <main className="max-w-6xl mx-auto px-4 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-4 lg:px-8 py-8 pb-24">
         {/* Welcome Banner */}
         <div
           className="rounded-3xl px-8 py-6 mb-10 flex flex-col sm:flex-row items-center gap-4 animate-fade-in"

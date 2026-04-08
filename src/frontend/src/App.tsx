@@ -1114,9 +1114,7 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
     e.preventDefault();
     const el = document.getElementById(id);
     if (el) {
-      const navHeight = 64;
-      const top =
-        el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+      const top = el.getBoundingClientRect().top + window.scrollY - 16;
       window.scrollTo({ top, behavior: "smooth" });
     }
   };
@@ -1125,85 +1123,83 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
 
   return (
     <nav
-      className="sticky top-0 z-50 px-4 transition-all duration-300"
+      className="fixed bottom-0 left-0 right-0 w-full z-50 transition-all duration-300"
       style={{
-        background: scrolled ? "rgba(255,255,255,0.95)" : "#ffffff",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
-        boxShadow: scrolled
-          ? "0 4px 24px rgba(142,92,159,0.18)"
-          : "0 2px 12px rgba(142,92,159,0.08)",
-        paddingTop: scrolled ? "6px" : "8px",
-        paddingBottom: scrolled ? "6px" : "8px",
+        background: scrolled
+          ? "rgba(255,255,255,0.97)"
+          : "rgba(255,255,255,0.93)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        boxShadow: "0 -4px 24px rgba(142,92,159,0.15)",
+        borderTop: "1.5px solid rgba(192,132,222,0.2)",
+        height: "64px",
       }}
       data-ocid="nav.panel"
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="max-w-7xl mx-auto h-full flex items-center justify-between px-4 gap-2">
+        {/* Logo + Brand */}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           <img
             src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
             alt="Mothera – Maternal Health Care"
-            className="transition-all duration-300"
-            style={{
-              height: scrolled ? "44px" : "56px",
-              width: "auto",
-              objectFit: "contain",
-            }}
+            style={{ height: "38px", width: "auto", objectFit: "contain" }}
           />
           <span
-            className="font-bold transition-all duration-300"
-            style={{ color: "#8E5C9F", fontSize: scrolled ? "18px" : "20px" }}
+            className="font-bold hidden sm:block"
+            style={{ color: "#8E5C9F", fontSize: "17px" }}
           >
             Mothera
           </span>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item, i) => {
-              const id = item.toLowerCase();
-              const isActive = activeSection === id;
-              return (
-                <a
-                  key={item}
-                  href={`#${id}`}
-                  onClick={(e) => handleNavClick(e, id)}
-                  data-ocid={`nav.link.${i + 1}`}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300"
-                  style={
-                    isActive
-                      ? {
-                          background: "#E8D5F5",
-                          color: "#8E5C9F",
-                          transform: "scale(1.05)",
-                        }
-                      : { color: "#7A7386", background: "transparent" }
-                  }
-                >
-                  {item}
-                </a>
-              );
-            })}
-          </div>
-          <button
-            type="button"
-            onClick={onLogout}
-            data-ocid="nav.button"
-            className="ml-2 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-200"
-            style={{
-              background: "#F0E8FA",
-              color: "#8E5C9F",
-              border: "1.5px solid #D8C0F0",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#E0D0F5";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "#F0E8FA";
-            }}
-          >
-            Logout
-          </button>
+
+        {/* Nav Items — centered */}
+        <div className="flex items-center gap-1 flex-1 justify-center">
+          {navItems.map((item, i) => {
+            const id = item.toLowerCase();
+            const isActive = activeSection === id;
+            return (
+              <a
+                key={item}
+                href={`#${id}`}
+                onClick={(e) => handleNavClick(e, id)}
+                data-ocid={`nav.link.${i + 1}`}
+                className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300"
+                style={
+                  isActive
+                    ? {
+                        background: "#E8D5F5",
+                        color: "#8E5C9F",
+                        transform: "scale(1.05)",
+                      }
+                    : { color: "#7A7386", background: "transparent" }
+                }
+              >
+                {item}
+              </a>
+            );
+          })}
         </div>
+
+        {/* Logout */}
+        <button
+          type="button"
+          onClick={onLogout}
+          data-ocid="nav.button"
+          className="flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-semibold transition-all duration-200"
+          style={{
+            background: "#F0E8FA",
+            color: "#8E5C9F",
+            border: "1.5px solid #D8C0F0",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#E0D0F5";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "#F0E8FA";
+          }}
+        >
+          Logout
+        </button>
       </div>
     </nav>
   );
@@ -3909,7 +3905,7 @@ export default function App() {
     >
       <GlobalNotifications />
       <NavBar onLogout={() => setIsLoggedIn(false)} />
-      <main className="max-w-6xl mx-auto px-4 lg:px-12 pb-0">
+      <main className="max-w-6xl mx-auto px-4 lg:px-12 pb-20">
         {/* Desktop: Hello Mom + Timeline side-by-side */}
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start mb-0">
           <div>
