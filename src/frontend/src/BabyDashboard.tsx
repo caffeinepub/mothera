@@ -2034,13 +2034,13 @@ function NavBar({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 w-full z-40 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 w-full z-40 transition-all duration-300"
       style={{
         background: "rgba(248,244,251,0.97)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        boxShadow: "0 -4px 24px rgba(142,92,159,0.15)",
-        borderTop: "1.5px solid rgba(192,132,222,0.2)",
+        boxShadow: "0 4px 24px rgba(142,92,159,0.15)",
+        borderBottom: "1.5px solid rgba(192,132,222,0.2)",
         height: "64px",
       }}
     >
@@ -2134,7 +2134,7 @@ export default function BabyDashboard({
 
       <NavBar onLogout={onLogout} motherName={motherName} babyName={babyName} />
 
-      <main className="max-w-6xl mx-auto px-4 lg:px-8 py-8 pb-24">
+      <main className="max-w-6xl mx-auto px-4 lg:px-8 pt-24 pb-8">
         {/* Welcome Banner */}
         <div
           className="rounded-3xl px-8 py-6 mb-10 flex flex-col sm:flex-row items-center gap-4 animate-fade-in"

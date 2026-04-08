@@ -1114,7 +1114,7 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
     e.preventDefault();
     const el = document.getElementById(id);
     if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - 16;
+      const top = el.getBoundingClientRect().top + window.scrollY - 80;
       window.scrollTo({ top, behavior: "smooth" });
     }
   };
@@ -1123,15 +1123,15 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 w-full z-50 transition-all duration-300"
+      className="fixed top-0 left-0 right-0 w-full z-50 transition-all duration-300"
       style={{
         background: scrolled
           ? "rgba(255,255,255,0.97)"
           : "rgba(255,255,255,0.93)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
-        boxShadow: "0 -4px 24px rgba(142,92,159,0.15)",
-        borderTop: "1.5px solid rgba(192,132,222,0.2)",
+        boxShadow: "0 4px 24px rgba(142,92,159,0.15)",
+        borderBottom: "1.5px solid rgba(192,132,222,0.2)",
         height: "64px",
       }}
       data-ocid="nav.panel"
@@ -3905,7 +3905,7 @@ export default function App() {
     >
       <GlobalNotifications />
       <NavBar onLogout={() => setIsLoggedIn(false)} />
-      <main className="max-w-6xl mx-auto px-4 lg:px-12 pb-20">
+      <main className="max-w-6xl mx-auto px-4 lg:px-12 pt-20">
         {/* Desktop: Hello Mom + Timeline side-by-side */}
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start mb-0">
           <div>
