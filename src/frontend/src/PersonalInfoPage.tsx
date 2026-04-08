@@ -80,7 +80,7 @@ export default function PersonalInfoPage({
       <div className="flex flex-col items-center mb-8">
         <div className="flex items-center gap-3 mb-5">
           <img
-            src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
+            src="/assets/mothera-logo.jpeg"
             alt="Mothera Logo"
             className="w-14 h-14 rounded-full object-cover shadow-md border-2 border-purple-200"
           />

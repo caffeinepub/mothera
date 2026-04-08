@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import BabyDashboard from "./BabyDashboard";
 import BabyInfoPage, { type BabyUserInfo } from "./BabyInfoPage";
+import CommunityPage from "./CommunityPage";
 import LoginPage from "./LoginPage";
 import PersonalInfoPage, { type UserInfo } from "./PersonalInfoPage";
 import RoleSelectionPage from "./RoleSelectionPage";
+import ShoppingPage from "./ShoppingPage";
 
 // ─── Global Notification System ───────────────────────────────────────────────
 type NotifType = { id: number; message: string; type: "warning" | "urgent" };
@@ -1073,13 +1075,21 @@ function CircularTimeline({
 }
 
 // ─── Components ───────────────────────────────────────────────────────────────
-function NavBar({ onLogout }: { onLogout: () => void }) {
+function NavBar({
+  onLogout,
+  onOpenAssistant: _onOpenAssistant,
+}: {
+  onLogout: () => void;
+  onOpenAssistant: () => void;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("dashboard");
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
+      // Mark "home" active when near the top
+      if (window.scrollY < 100) setActiveSection("dashboard");
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -1107,11 +1117,15 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
     };
   }, []);
 
-  const handleNavClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
+  const handleScrollTo = (
+    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
     id: string,
   ) => {
     e.preventDefault();
+    if (id === "home") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     const el = document.getElementById(id);
     if (el) {
       const top = el.getBoundingClientRect().top + window.scrollY - 80;
@@ -1119,7 +1133,12 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
     }
   };
 
-  const navItems = ["Dashboard", "Timeline", "Wellness", "Connect"];
+  const navItems = [
+    { label: "Home", id: "home", sectionId: "dashboard" },
+    { label: "Timeline", id: "timeline", sectionId: "timeline" },
+    { label: "Wellness", id: "wellness", sectionId: "wellness" },
+    { label: "Connect", id: "connect", sectionId: "connect" },
+  ];
 
   return (
     <nav
@@ -1140,7 +1159,7 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
         {/* Logo + Brand */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
           <img
-            src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
+            src="/assets/mothera-logo.jpeg"
             alt="Mothera – Maternal Health Care"
             style={{ height: "38px", width: "auto", objectFit: "contain" }}
           />
@@ -1155,13 +1174,12 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
         {/* Nav Items — centered */}
         <div className="flex items-center gap-1 flex-1 justify-center">
           {navItems.map((item, i) => {
-            const id = item.toLowerCase();
-            const isActive = activeSection === id;
+            const isActive = activeSection === item.sectionId;
             return (
-              <a
-                key={item}
-                href={`#${id}`}
-                onClick={(e) => handleNavClick(e, id)}
+              <button
+                type="button"
+                key={item.id}
+                onClick={(e) => handleScrollTo(e, item.id)}
                 data-ocid={`nav.link.${i + 1}`}
                 className="px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-300"
                 style={
@@ -1174,8 +1192,8 @@ function NavBar({ onLogout }: { onLogout: () => void }) {
                     : { color: "#7A7386", background: "transparent" }
                 }
               >
-                {item}
-              </a>
+                {item.label}
+              </button>
             );
           })}
         </div>
@@ -2212,8 +2230,7 @@ const QUICK_REPLIES = [
   },
 ];
 
-const LOGO_SRC =
-  "/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg";
+const LOGO_SRC = "/assets/mothera-logo.jpeg";
 
 function AIChat({ onClose }: { onClose?: () => void }) {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
@@ -3535,25 +3552,6 @@ function CheckUpReminder() {
   );
 }
 
-function Footer() {
-  return (
-    <footer
-      className="rounded-t-3xl mt-4 py-10 px-4 text-center"
-      style={{ background: "linear-gradient(135deg, #8E5C9F, #6B3A7D)" }}
-    >
-      <div className="flex items-center justify-center gap-2 mb-2">
-        <p className="text-xl font-bold text-white">
-          You are doing amazing, Mom
-        </p>
-        <HeartIcon className="w-6 h-6" />
-      </div>
-      <p className="text-sm mb-6" style={{ color: "rgba(255,255,255,0.75)" }}>
-        Mothera · Your pregnancy companion
-      </p>
-    </footer>
-  );
-}
-
 // ─── MusicOverlay ─────────────────────────────────────────────────────────────
 const PREGNANCY_MUSIC = [
   {
@@ -3774,16 +3772,22 @@ function MusicOverlay() {
 }
 
 // ─── TinaChatOverlay ──────────────────────────────────────────────────────────
-function TinaChatOverlay() {
-  const [isOpen, setIsOpen] = useState(false);
-
+function TinaChatOverlay({
+  isOpen,
+  onOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+}) {
   return (
     <>
       {/* Floating Chat Button */}
       <button
         type="button"
         data-ocid="chat.open_modal_button"
-        onClick={() => setIsOpen(true)}
+        onClick={onOpen}
         aria-label="Chat with Tina"
         className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110 cursor-pointer"
         style={{ background: "linear-gradient(135deg, #8E5C9F, #B07CC6)" }}
@@ -3818,10 +3822,146 @@ function TinaChatOverlay() {
             background: "linear-gradient(180deg, #F8F4FB 0%, #EDE4F5 100%)",
           }}
         >
-          <AIChat onClose={() => setIsOpen(false)} />
+          <AIChat onClose={onClose} />
         </div>
       )}
     </>
+  );
+}
+
+// ─── Bottom Navigation Bar ────────────────────────────────────────────────────
+type ActiveView = "home" | "assistant" | "community" | "shopping";
+
+function BottomNav({
+  activeView,
+  onNavigate,
+}: {
+  activeView: ActiveView;
+  onNavigate: (view: ActiveView) => void;
+}) {
+  const items: { id: ActiveView; label: string; icon: React.ReactNode }[] = [
+    {
+      id: "home",
+      label: "Home",
+      icon: (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      ),
+    },
+    {
+      id: "assistant",
+      label: "Assistant",
+      icon: (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: "community",
+      label: "Community",
+      icon: (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+    },
+    {
+      id: "shopping",
+      label: "Shopping",
+      icon: (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 w-full z-50"
+      style={{
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderTop: "1.5px solid rgba(192,132,222,0.2)",
+        boxShadow: "0 -4px 24px rgba(142,92,159,0.12)",
+        height: "60px",
+      }}
+      data-ocid="bottom.nav.panel"
+    >
+      <div className="max-w-lg mx-auto h-full flex items-center justify-around px-2">
+        {items.map((item) => {
+          const isActive = activeView === item.id;
+          return (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              data-ocid={`bottom.nav.${item.id}`}
+              className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all duration-200"
+              style={{
+                color: isActive ? "#8E5C9F" : "#9CA3AF",
+                background: isActive ? "#F0E8FA" : "transparent",
+                minWidth: "60px",
+              }}
+            >
+              {item.icon}
+              <span className="text-xs font-medium leading-tight">
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -3832,6 +3972,9 @@ export default function App() {
   const [hasCompletedProfile, setHasCompletedProfile] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [babyUserInfo, setBabyUserInfo] = useState<BabyUserInfo | null>(null);
+  const [showTina, setShowTina] = useState(false);
+  const [activeView, setActiveView] = useState<ActiveView>("home");
+
   const autoMonth = userInfo?.pregnancyWeek
     ? Math.min(
         Math.max(
@@ -3842,6 +3985,26 @@ export default function App() {
       )
     : null;
   const [selectedMonth, setSelectedMonth] = useState<number | null>(autoMonth);
+
+  const handleNavigate = (view: ActiveView) => {
+    if (view === "assistant") {
+      setShowTina(true);
+      setActiveView("home");
+      return;
+    }
+    setActiveView(view);
+    if (view === "home") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setRole(null);
+    setHasCompletedProfile(false);
+    setUserInfo(null);
+    setBabyUserInfo(null);
+    setActiveView("home");
+  };
+
   if (!isLoggedIn) {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
   }
@@ -3867,12 +4030,12 @@ export default function App() {
     return (
       <BabyDashboard
         babyUserInfo={babyUserInfo!}
-        onLogout={() => {
-          setIsLoggedIn(false);
-          setRole(null);
-          setHasCompletedProfile(false);
-          setBabyUserInfo(null);
-        }}
+        onLogout={handleLogout}
+        activeView={activeView}
+        onNavigate={handleNavigate}
+        showTina={showTina}
+        onOpenTina={() => setShowTina(true)}
+        onCloseTina={() => setShowTina(false)}
       />
     );
   }
@@ -3896,6 +4059,52 @@ export default function App() {
       />
     );
   }
+
+  // ── Shared nav elements for Community / Shopping ──
+  const topNavSlot = (
+    <NavBar onLogout={handleLogout} onOpenAssistant={() => setShowTina(true)} />
+  );
+  const bottomNavSlot = (
+    <BottomNav activeView={activeView} onNavigate={handleNavigate} />
+  );
+
+  if (activeView === "community") {
+    return (
+      <>
+        <GlobalNotifications />
+        <CommunityPage
+          onLogout={handleLogout}
+          topNavSlot={topNavSlot}
+          bottomNavSlot={bottomNavSlot}
+        />
+        <TinaChatOverlay
+          isOpen={showTina}
+          onOpen={() => setShowTina(true)}
+          onClose={() => setShowTina(false)}
+        />
+      </>
+    );
+  }
+
+  if (activeView === "shopping") {
+    return (
+      <>
+        <GlobalNotifications />
+        <ShoppingPage
+          onLogout={handleLogout}
+          topNavSlot={topNavSlot}
+          bottomNavSlot={bottomNavSlot}
+        />
+        <TinaChatOverlay
+          isOpen={showTina}
+          onOpen={() => setShowTina(true)}
+          onClose={() => setShowTina(false)}
+        />
+      </>
+    );
+  }
+
+  // Default: pregnancy home dashboard
   return (
     <div
       style={{
@@ -3904,8 +4113,11 @@ export default function App() {
       }}
     >
       <GlobalNotifications />
-      <NavBar onLogout={() => setIsLoggedIn(false)} />
-      <main className="max-w-6xl mx-auto px-4 lg:px-12 pt-20">
+      <NavBar
+        onLogout={handleLogout}
+        onOpenAssistant={() => setShowTina(true)}
+      />
+      <main className="max-w-6xl mx-auto px-4 lg:px-12 pt-20 pb-20">
         {/* Desktop: Hello Mom + Timeline side-by-side */}
         <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-start mb-0">
           <div>
@@ -3972,9 +4184,13 @@ export default function App() {
           userPhone={userInfo?.phone || ""}
         />
       </main>
-      <Footer />
       <MusicOverlay />
-      <TinaChatOverlay />
+      <TinaChatOverlay
+        isOpen={showTina}
+        onOpen={() => setShowTina(true)}
+        onClose={() => setShowTina(false)}
+      />
+      <BottomNav activeView={activeView} onNavigate={handleNavigate} />
     </div>
   );
 }

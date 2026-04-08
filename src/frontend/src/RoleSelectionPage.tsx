@@ -49,17 +49,11 @@ export default function RoleSelectionPage({
             style={{ boxShadow: "0 4px 16px rgba(142,92,159,0.25)" }}
           >
             <img
-              src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
+              src="/assets/mothera-logo.jpeg"
               alt="Mothera Logo"
               className="w-full h-full object-cover"
             />
           </div>
-          <h1
-            className="text-3xl font-extrabold tracking-tight"
-            style={{ color: "#8E5C9F" }}
-          >
-            Mothera
-          </h1>
           <p className="text-sm mt-1" style={{ color: "#7A7386" }}>
             Your pregnancy companion
           </p>

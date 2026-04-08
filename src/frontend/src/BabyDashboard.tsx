@@ -17,15 +17,17 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Baby,
   Heart,
+  Home,
   LogOut,
-  Music,
+  MessageCircle,
   ShoppingCart,
   Star,
-  Users,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { BabyUserInfo } from "./BabyInfoPage";
+import CommunityPage from "./CommunityPage";
+import ShoppingPage from "./ShoppingPage";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface FeedingEntry {
@@ -2001,11 +2003,19 @@ function NavBar({
   onLogout,
   motherName,
   babyName,
-}: { onLogout: () => void; motherName: string; babyName: string }) {
+}: {
+  onLogout: () => void;
+  motherName: string;
+  babyName: string;
+}) {
   const [activeSection, setActiveSection] = useState("baby-care");
 
   useEffect(() => {
     const handleScroll = () => {
+      if (window.scrollY < 100) {
+        setActiveSection("home");
+        return;
+      }
       const sections = ["baby-care", "wellness", "community", "products"];
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id);
@@ -2020,16 +2030,19 @@ function NavBar({
   }, []);
 
   const scrollTo = (id: string) => {
+    if (id === "home") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
     document
       .getElementById(id)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const navLinks = [
+    { id: "home", icon: Home, label: "Home" },
     { id: "baby-care", icon: Baby, label: "Baby Care" },
     { id: "wellness", icon: Heart, label: "Wellness" },
-    { id: "community", icon: Users, label: "Community" },
-    { id: "products", icon: ShoppingCart, label: "Products" },
   ];
 
   return (
@@ -2048,7 +2061,7 @@ function NavBar({
         {/* Brand */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <img
-            src="/assets/uploads/whatsapp_image_2026-03-27_at_12.21.23_pm-019d34a7-f0a0-7105-9a66-fca6a07c17fc-1.jpeg"
+            src="/assets/mothera-logo.jpeg"
             alt="Mothera"
             className="w-8 h-8 rounded-full object-cover border-2 border-purple-200"
           />
@@ -2107,20 +2120,490 @@ function NavBar({
   );
 }
 
+// ─── TinaChatOverlay (Baby Dashboard) ────────────────────────────────────────
+interface TinaMessage {
+  id: number;
+  role: "user" | "ai";
+  text: string;
+}
+
+function getTinaResponse(input: string): string {
+  const msg = input.toLowerCase();
+  if (msg.includes("sleep"))
+    return "For newborn sleep, try white noise, keeping the room cool (68–72°F), and a consistent bedtime routine. Sleep 'windows' of 1–2 hours are normal for babies under 3 months. 💜";
+  if (msg.includes("feed") || msg.includes("breast") || msg.includes("milk"))
+    return "Feed your baby every 2–3 hours (8–12 times in 24 hours) in the newborn phase. Watch for hunger cues like rooting or fists near mouth. A well-fed baby will have 6+ wet diapers a day.";
+  if (msg.includes("cry") || msg.includes("colic"))
+    return "Crying peaks around 6 weeks and usually eases by 3–4 months. Try the 5 S's: swaddle, side/stomach position (in arms), shush, swing, and suck. If crying is inconsolable for 3+ hours, contact your pediatrician.";
+  if (msg.includes("vaccin") || msg.includes("shot"))
+    return "Vaccines keep your baby safe from serious diseases. The BCG and Hepatitis B shots are given at birth. Your pediatrician will schedule the next round at 6 weeks. Check the Vaccination tab in Baby Care for the full schedule.";
+  if (msg.includes("milestone") || msg.includes("develop"))
+    return "Every baby develops at their own pace! By 2 months, look for social smiles. By 4 months, head control. By 6 months, sitting with support. Check the Milestones tab in Baby Care for detailed age-by-age guidance.";
+  if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey"))
+    return "Hello! 👋 I'm Tina, your Mothera Assistant. I'm here to help you with questions about your baby's care, milestones, feeding, sleep, and your wellness. How can I help you today?";
+  if (msg.includes("thank"))
+    return "You're so welcome! 💜 You're doing an amazing job as a mama. I'm always here whenever you need support or have questions. Take care! 🌸";
+  const defaults = [
+    "That's a great question! Could you share more details? I want to give you the most helpful advice possible. 💜",
+    "Every baby is unique and wonderful. For specific medical concerns, always consult your pediatrician — but I'm here for general support and guidance!",
+    "I'm here to help! Is there something specific about your baby's care or your wellness you'd like to know more about?",
+  ];
+  return defaults[Math.floor(Math.random() * defaults.length)];
+}
+
+function BabyTinaOverlay({
+  isOpen,
+  onOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onOpen: () => void;
+  onClose: () => void;
+}) {
+  const [messages, setMessages] = useState<TinaMessage[]>([
+    {
+      id: 1,
+      role: "ai",
+      text: "Hello! I'm Tina, your Mothera Assistant 💜 Ask me anything about your baby's care, milestones, feeding, sleep, or your own wellness!",
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const nextId = useRef(2);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scrollRef is stable
+  useEffect(() => {
+    if (scrollRef.current)
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, isTyping]);
+
+  const handleSend = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isTyping) return;
+    setMessages((prev) => [
+      ...prev,
+      { id: nextId.current++, role: "user", text: trimmed },
+    ]);
+    setInput("");
+    setIsTyping(true);
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId.current++, role: "ai", text: getTinaResponse(trimmed) },
+      ]);
+      setIsTyping(false);
+    }, 1100);
+  };
+
+  return (
+    <>
+      {/* Floating Button */}
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label="Chat with Tina"
+        data-ocid="baby.chat.open_button"
+        className="fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 hover:scale-110"
+        style={{ background: "linear-gradient(135deg, #8E5C9F, #B07CC6)" }}
+      >
+        <MessageCircle className="w-6 h-6 text-white" />
+        <span
+          className="absolute top-1 right-1 w-3 h-3 rounded-full border-2 border-white"
+          style={{ background: "#22C55E" }}
+        />
+      </button>
+
+      {/* Full-Screen Overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col"
+          data-ocid="baby.chat.modal"
+          style={{
+            background: "linear-gradient(180deg, #F8F4FB 0%, #EDE4F5 100%)",
+          }}
+        >
+          {/* Header */}
+          <div
+            className="flex items-center gap-3 px-4 py-3 shrink-0"
+            style={{
+              background: "linear-gradient(135deg, #8E5C9F 0%, #B07CC6 100%)",
+            }}
+          >
+            <div className="relative flex-shrink-0">
+              <img
+                src="/assets/mothera-logo.jpeg"
+                alt="Tina"
+                className="w-10 h-10 rounded-full object-cover border-2 border-white/40"
+              />
+              <span
+                className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
+                style={{ background: "#22C55E" }}
+              />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-white font-bold text-base leading-tight">
+                Tina
+              </h2>
+              <p className="text-white/75 text-xs">
+                Mothera Baby Assistant · Online
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              data-ocid="baby.chat.close_button"
+              className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/20 transition-all"
+              aria-label="Close chat"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <title>Close</title>
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div
+            ref={scrollRef}
+            className="flex-1 overflow-y-auto px-4 py-4 space-y-3"
+          >
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                {msg.role === "ai" && (
+                  <img
+                    src="/assets/mothera-logo.jpeg"
+                    alt="Tina"
+                    className="w-7 h-7 rounded-full object-cover flex-shrink-0 mt-1"
+                  />
+                )}
+                <div
+                  className="max-w-xs px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
+                  style={
+                    msg.role === "user"
+                      ? {
+                          background:
+                            "linear-gradient(135deg, #8E5C9F, #B07CC6)",
+                          color: "#fff",
+                          borderBottomRightRadius: "4px",
+                        }
+                      : {
+                          background: "#fff",
+                          color: "#2B1F3A",
+                          border: "1px solid #E8D5F5",
+                          borderBottomLeftRadius: "4px",
+                        }
+                  }
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="flex gap-2 justify-start">
+                <img
+                  src="/assets/mothera-logo.jpeg"
+                  alt="Tina"
+                  className="w-7 h-7 rounded-full object-cover flex-shrink-0 mt-1"
+                />
+                <div
+                  className="px-4 py-3 rounded-2xl"
+                  style={{
+                    background: "#fff",
+                    border: "1px solid #E8D5F5",
+                    borderBottomLeftRadius: "4px",
+                  }}
+                >
+                  <div className="flex gap-1 items-center">
+                    {[0, 1, 2].map((i) => (
+                      <span
+                        key={i}
+                        className="w-2 h-2 rounded-full animate-bounce"
+                        style={{
+                          background: "#B07CC6",
+                          animationDelay: `${i * 0.15}s`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Input */}
+          <div
+            className="shrink-0 px-4 py-3 flex gap-2"
+            style={{ borderTop: "1px solid #E8D5F5", background: "#fff" }}
+          >
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend(input)}
+              placeholder="Ask Tina anything…"
+              data-ocid="baby.chat.input"
+              className="flex-1 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-purple-300"
+              style={{ border: "1.5px solid #D8C0F0", color: "#2B1F3A" }}
+            />
+            <button
+              type="button"
+              onClick={() => handleSend(input)}
+              disabled={!input.trim() || isTyping}
+              data-ocid="baby.chat.send_button"
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-40"
+              style={{
+                background: "linear-gradient(135deg, #8E5C9F, #B07CC6)",
+              }}
+              aria-label="Send message"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                <title>Send</title>
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+// ─── Bottom Nav (Baby) ────────────────────────────────────────────────────────
+type ActiveView = "home" | "assistant" | "community" | "shopping";
+
+function BottomNavBaby({
+  activeView,
+  onNavigate,
+}: {
+  activeView: ActiveView;
+  onNavigate: (view: ActiveView) => void;
+}) {
+  const items: { id: ActiveView; label: string; icon: React.ReactNode }[] = [
+    {
+      id: "home",
+      label: "Home",
+      icon: (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+      ),
+    },
+    {
+      id: "assistant",
+      label: "Assistant",
+      icon: (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+      ),
+    },
+    {
+      id: "community",
+      label: "Community",
+      icon: (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      ),
+    },
+    {
+      id: "shopping",
+      label: "Shopping",
+      icon: (
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 w-full z-50"
+      style={{
+        background: "rgba(255,255,255,0.92)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        borderTop: "1.5px solid rgba(192,132,222,0.2)",
+        boxShadow: "0 -4px 24px rgba(142,92,159,0.12)",
+        height: "60px",
+      }}
+      data-ocid="bottom.nav.panel"
+    >
+      <div className="max-w-lg mx-auto h-full flex items-center justify-around px-2">
+        {items.map((item) => {
+          const isActive = activeView === item.id;
+          return (
+            <button
+              type="button"
+              key={item.id}
+              onClick={() => onNavigate(item.id)}
+              data-ocid={`bottom.nav.${item.id}`}
+              className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-xl transition-all duration-200"
+              style={{
+                color: isActive ? "#8E5C9F" : "#9CA3AF",
+                background: isActive ? "#F0E8FA" : "transparent",
+                minWidth: "60px",
+              }}
+            >
+              {item.icon}
+              <span className="text-xs font-medium leading-tight">
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 // ─── BabyDashboard ────────────────────────────────────────────────────────────
 interface BabyDashboardProps {
   babyUserInfo: BabyUserInfo;
   onLogout: () => void;
+  activeView: ActiveView;
+  onNavigate: (view: ActiveView) => void;
+  showTina: boolean;
+  onOpenTina: () => void;
+  onCloseTina: () => void;
 }
 
 export default function BabyDashboard({
   babyUserInfo,
   onLogout,
+  activeView,
+  onNavigate,
+  showTina,
+  onOpenTina,
+  onCloseTina,
 }: BabyDashboardProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const motherName = babyUserInfo.motherFirstName || "";
   const babyName = babyUserInfo.babyName || "";
   const babyDob = babyUserInfo.babyDateOfBirth || "";
+
+  const handleNavigate = (view: ActiveView) => {
+    if (view === "assistant") {
+      onOpenTina();
+      return;
+    }
+    onNavigate(view);
+    if (view === "home") window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const topNavSlot = (
+    <NavBar onLogout={onLogout} motherName={motherName} babyName={babyName} />
+  );
+
+  const bottomNavSlot = (
+    <BottomNavBaby activeView={activeView} onNavigate={handleNavigate} />
+  );
+
+  if (activeView === "community") {
+    return (
+      <>
+        <Toaster position="bottom-right" />
+        <CommunityPage
+          onLogout={onLogout}
+          topNavSlot={topNavSlot}
+          bottomNavSlot={bottomNavSlot}
+        />
+        <BabyTinaOverlay
+          isOpen={showTina}
+          onOpen={onOpenTina}
+          onClose={onCloseTina}
+        />
+      </>
+    );
+  }
+
+  if (activeView === "shopping") {
+    return (
+      <>
+        <Toaster position="bottom-right" />
+        <ShoppingPage
+          onLogout={onLogout}
+          topNavSlot={topNavSlot}
+          bottomNavSlot={bottomNavSlot}
+        />
+        <BabyTinaOverlay
+          isOpen={showTina}
+          onOpen={onOpenTina}
+          onClose={onCloseTina}
+        />
+      </>
+    );
+  }
 
   return (
     <div
@@ -2134,7 +2617,7 @@ export default function BabyDashboard({
 
       <NavBar onLogout={onLogout} motherName={motherName} babyName={babyName} />
 
-      <main className="max-w-6xl mx-auto px-4 lg:px-8 pt-24 pb-8">
+      <main className="max-w-6xl mx-auto px-4 lg:px-8 pt-24 pb-20">
         {/* Welcome Banner */}
         <div
           className="rounded-3xl px-8 py-6 mb-10 flex flex-col sm:flex-row items-center gap-4 animate-fade-in"
@@ -2143,7 +2626,7 @@ export default function BabyDashboard({
             boxShadow: "0 12px 40px rgba(124,58,237,0.25)",
           }}
         >
-          <div className="text-5xl">\uD83D\uDC76</div>
+          <div className="text-5xl">👶</div>
           <div className="text-center sm:text-left">
             <h1
               style={{ fontFamily: "Fraunces, serif" }}
@@ -2175,21 +2658,15 @@ export default function BabyDashboard({
         <MotherWellnessHub />
         <MothersCommunity />
         <BabyProducts />
-
-        {/* Footer */}
-        <footer className="text-center py-8 text-purple-300 text-sm">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Music className="w-4 h-4" />
-            <span
-              style={{ fontFamily: "Fraunces, serif" }}
-              className="text-purple-600 font-semibold"
-            >
-              Mothera
-            </span>
-          </div>
-          <p>Your trusted companion for every milestone 💜</p>
-        </footer>
       </main>
+
+      <BabyTinaOverlay
+        isOpen={showTina}
+        onOpen={onOpenTina}
+        onClose={onCloseTina}
+      />
+
+      <BottomNavBaby activeView={activeView} onNavigate={handleNavigate} />
     </div>
   );
 }
